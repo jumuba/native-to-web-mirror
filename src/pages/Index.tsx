@@ -365,8 +365,9 @@ export default function Index() {
             </div>
           </div>
         </div>
+        {/* Close Screen */}
         </div>
-        </div>
+        {/* Close Device Shell */}
       </div>
     </div>
   );
