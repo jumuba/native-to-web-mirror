@@ -185,7 +185,7 @@ export default function Index() {
         </div>
 
         {/* Content Section */}
-        <div style={{ marginTop: 34 }}>
+        <div style={{ marginTop: 50 }}>
           {/* Upcoming Bar */}
           <div
             className="flex items-center"
