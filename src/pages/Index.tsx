@@ -1,7 +1,7 @@
 import React from "react";
 import {
   Home,
-  Image,
+  ImageIcon,
   Bell,
   User,
   Gift,
