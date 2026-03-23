@@ -124,7 +124,7 @@ export default function Index() {
       <div
         style={{
           width: 405,
-          minHeight: 820,
+          minHeight: 750,
           backgroundColor: "#1a1a1a",
           borderRadius: 50,
           padding: "12px 15px",
