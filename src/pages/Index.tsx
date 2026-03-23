@@ -36,7 +36,7 @@ const albumCards = [
 
 const sidebarItems = [
   { id: "dashboard", label: "Dashboard", icon: <Home size={13} color="#7d8699" />, active: false },
-  { id: "memories", label: "My Memories", icon: <Image size={13} color="#ffffff" />, active: true },
+  { id: "memories", label: "My Memories", icon: <ImageIcon size={13} color="#ffffff" />, active: true },
   { id: "reminders", label: "Reminders", icon: <Bell size={13} color="#7d8699" />, active: false },
   { id: "profile", label: "My Profile", icon: <User size={13} color="#7d8699" />, active: false },
   { id: "offers", label: "Offers", icon: <Gift size={13} color="#7d8699" />, active: false },
