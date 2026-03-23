@@ -320,7 +320,7 @@ export default function Index() {
                   backgroundColor: "rgba(255,255,255,0.48)",
                   border: "1px solid rgba(214,223,241,0.9)",
                   overflow: "hidden",
-                  height: 140,
+                  height: 155,
                 }}
               >
                 <div style={{ paddingTop: 8, paddingLeft: 6, paddingRight: 6, paddingBottom: 6 }}>
