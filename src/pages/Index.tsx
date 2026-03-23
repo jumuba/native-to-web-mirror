@@ -158,7 +158,9 @@ export default function Index() {
             paddingLeft: 6,
             paddingRight: 1,
             paddingBottom: 10,
-            backgroundColor: "#ffffff",
+            backgroundImage: `url(${bgSkyFloral})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             borderRadius: 38,
             overflow: "hidden",
           }}
