@@ -351,8 +351,12 @@ export default function Index() {
               style={{
                 width: 237,
                 height: 432,
-                overflow: "visible",
+                overflowY: "auto",
+                overflowX: "hidden",
+                msOverflowStyle: "none",
+                scrollbarWidth: "none",
               }}
+              className="[&::-webkit-scrollbar]:hidden"
             >
               <div
                 className="flex flex-wrap justify-between"
