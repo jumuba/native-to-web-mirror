@@ -350,8 +350,8 @@ export default function Index() {
             <div
               style={{
                 width: 237,
-                height: 416,
-                overflow: "hidden",
+                height: 432,
+                overflow: "visible",
               }}
             >
               <div
