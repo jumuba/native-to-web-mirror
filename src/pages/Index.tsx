@@ -134,7 +134,7 @@ export default function Index() {
         {/* Status Bar */}
         <div
           className="flex items-center justify-between"
-          style={{ height: 24, paddingLeft: 30, paddingRight: 13, marginBottom: 18 }}
+          style={{ height: 24, paddingLeft: 20, paddingRight: 20, marginBottom: 18 }}
         >
           <span style={{ fontSize: 15, color: "#111111", fontWeight: 600, letterSpacing: -0.2 }}>
             9:41
