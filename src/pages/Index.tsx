@@ -308,7 +308,7 @@ export default function Index() {
                 </div>
                 <div
                   className="flex items-center justify-center"
-                  style={{ height: 106, backgroundColor: "#8aa2d8" }}
+                  style={{ height: 90, backgroundColor: "#8aa2d8" }}
                 >
                   <PlayCircle size={24} color="#ffffff" />
                 </div>
