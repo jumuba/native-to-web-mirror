@@ -17,6 +17,7 @@ import {
   BatteryFull,
 } from "lucide-react";
 
+import bgSkyFloral from "@/assets/bg-sky-floral.png";
 import avatar from "@/assets/avatar.png";
 import cardBirthdays from "@/assets/card_birthdays.png";
 import cardBirthRobert from "@/assets/card_birth_robert.png";
