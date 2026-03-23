@@ -119,18 +119,49 @@ function Card({ image, title }: { image: string; title: string }) {
 
 export default function Index() {
   return (
-    <div className="min-h-screen flex items-start justify-center" style={{ backgroundColor: "#ffffff" }}>
-      {/* Phone Frame */}
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#ffffff" }}>
+      {/* Phone Device Shell */}
       <div
         style={{
-          width: 375,
-          minHeight: 760,
-          paddingTop: 32,
-          paddingLeft: 6,
-          paddingRight: 1,
-          paddingBottom: 10,
+          width: 405,
+          minHeight: 820,
+          backgroundColor: "#1a1a1a",
+          borderRadius: 50,
+          padding: "12px 15px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.3), inset 0 0 0 2px #333",
+          position: "relative",
+          border: "3px solid #2a2a2a",
         }}
       >
+        {/* Notch / Dynamic Island */}
+        <div
+          style={{
+            width: 120,
+            height: 28,
+            backgroundColor: "#1a1a1a",
+            borderRadius: 20,
+            position: "absolute",
+            top: 10,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+          }}
+        />
+
+        {/* Screen */}
+        <div
+          style={{
+            width: 375,
+            minHeight: 760,
+            paddingTop: 32,
+            paddingLeft: 6,
+            paddingRight: 1,
+            paddingBottom: 10,
+            backgroundColor: "#ffffff",
+            borderRadius: 38,
+            overflow: "hidden",
+          }}
+        >
         {/* Status Bar */}
         <div
           className="flex items-center justify-between"
