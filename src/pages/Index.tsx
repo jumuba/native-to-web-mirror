@@ -152,7 +152,7 @@ export default function Index() {
         <div
           style={{
             width: 375,
-            minHeight: 760,
+            minHeight: 680,
             paddingTop: 14,
             paddingLeft: 6,
             paddingRight: 1,
