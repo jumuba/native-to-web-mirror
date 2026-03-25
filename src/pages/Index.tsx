@@ -153,7 +153,7 @@ export default function Index() {
         {/* Screen */}
         <div
           style={{
-            width: 375,
+            width: "100%",
             minHeight: 720,
             paddingTop: 14,
             paddingLeft: 4,
