@@ -156,7 +156,7 @@ export default function Index() {
             minHeight: 720,
             paddingTop: 14,
             paddingLeft: 4,
-            paddingRight: 3,
+            paddingRight: 4,
             paddingBottom: 10,
             backgroundImage: `url(${bgSkyFloral})`,
             backgroundSize: "cover",
