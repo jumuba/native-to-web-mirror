@@ -323,10 +323,10 @@ export default function Index() {
                   backgroundColor: "rgba(255,255,255,0.48)",
                   border: "1px solid rgba(214,223,241,0.9)",
                   overflow: "hidden",
-                  height: 152,
+                  height: 100,
                 }}
               >
-                <div style={{ paddingTop: 8, paddingLeft: 6, paddingRight: 6, paddingBottom: 6 }}>
+                <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
                   <p
                     style={{
                       fontSize: 10.2,
@@ -342,9 +342,42 @@ export default function Index() {
                 </div>
                 <div
                   className="flex items-center justify-center"
-                  style={{ height: 112, backgroundColor: "#8aa2d8" }}
+                  style={{ height: 72, backgroundColor: "#8aa2d8" }}
                 >
-                  <PlayCircle size={24} color="#ffffff" />
+                  <PlayCircle size={20} color="#ffffff" />
+                </div>
+              </div>
+
+              {/* Photo Albums */}
+              <div
+                style={{
+                  marginTop: 6,
+                  borderRadius: 8,
+                  backgroundColor: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(214,223,241,0.9)",
+                  overflow: "hidden",
+                  height: 100,
+                }}
+              >
+                <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
+                  <p
+                    style={{
+                      fontSize: 10.2,
+                      lineHeight: "10.2px",
+                      color: "#4150a9",
+                      fontWeight: 800,
+                      textAlign: "center",
+                      margin: 0,
+                    }}
+                  >
+                    PHOTO ALBUMS
+                  </p>
+                </div>
+                <div
+                  className="flex items-center justify-center"
+                  style={{ height: 72, backgroundColor: "#8aa2d8" }}
+                >
+                  <ImageIcon size={20} color="#ffffff" />
                 </div>
               </div>
             </div>
