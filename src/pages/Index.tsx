@@ -129,7 +129,7 @@ export default function Index() {
           minHeight: 750,
           backgroundColor: "#1a1a1a",
           borderRadius: 50,
-          padding: "12px 15px",
+          padding: "12px 12px",
           boxShadow: "0 20px 60px rgba(0,0,0,0.3), inset 0 0 0 2px #333",
           position: "relative",
           border: "3px solid #2a2a2a",
