@@ -164,6 +164,7 @@ export default function Index() {
             backgroundPosition: "center",
             borderRadius: 38,
             overflow: "hidden",
+            margin: "0 auto",
           }}
         >
         {/* Status Bar */}
