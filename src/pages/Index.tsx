@@ -183,7 +183,7 @@ export default function Index() {
         {/* Header */}
         <div className="text-center" style={{ marginBottom: 20 }}>
           <h1 style={{ fontSize: 30, color: "#5665c9", fontWeight: 400, letterSpacing: 0, margin: 0 }}>
-            SmartMemory
+            Spark
           </h1>
         </div>
 
