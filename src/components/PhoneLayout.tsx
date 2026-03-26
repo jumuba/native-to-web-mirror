@@ -395,7 +395,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
                   style={{ paddingBottom: 12 }}
                 >
                   {cards.map((card) => (
-                    <Card key={card.id} image={card.image} title={card.title} />
+                    <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
                   ))}
                 </div>
               </div>
