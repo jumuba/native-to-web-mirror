@@ -8,7 +8,7 @@ import { JuryS6Outro } from "./scenes/JuryS6Outro";
 
 export const JuryVideo = () => {
   const frame = useCurrentFrame();
-  const hue = interpolate(frame, [0, 2250], [0, 15]);
+  const hue = interpolate(frame, [0, 2700], [0, 15]);
 
   return (
     <AbsoluteFill>
@@ -20,44 +20,42 @@ export const JuryVideo = () => {
       />
 
       {/* Subtle floating orbs */}
-      {[0, 1, 2, 3, 4].map((i) => {
-        const y = interpolate(frame, [0, 2250], [300 + i * 180, 50 + i * 180]);
-        const x = 300 + i * 380 + Math.sin((frame + i * 60) * 0.008) * 80;
-        const size = 120 + i * 40;
+      {[0, 1, 2, 3].map((i) => {
+        const y = interpolate(frame, [0, 2700], [400 + i * 200, 100 + i * 200]);
+        const x = 400 + i * 400 + Math.sin((frame + i * 80) * 0.006) * 100;
+        const size = 150 + i * 50;
         return (
           <div
             key={i}
             style={{
               position: "absolute",
-              left: x,
-              top: y,
-              width: size,
-              height: size,
+              left: x, top: y,
+              width: size, height: size,
               borderRadius: "50%",
-              background: `radial-gradient(circle, rgba(212,168,83,${0.03 + i * 0.01}), transparent)`,
+              background: `radial-gradient(circle, rgba(212,168,83,${0.02 + i * 0.008}), transparent)`,
             }}
           />
         );
       })}
 
-      {/* Scenes */}
+      {/* Scenes - total: 2700 frames = 90 seconds */}
       <Series>
-        <Series.Sequence durationInFrames={100}>
+        <Series.Sequence durationInFrames={150}>
           <JuryS1Hook />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={420}>
+        <Series.Sequence durationInFrames={500}>
           <JuryS2SmartGroup />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={390}>
+        <Series.Sequence durationInFrames={470}>
           <JuryS3Birthday />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={510}>
+        <Series.Sequence durationInFrames={650}>
           <JuryS4Tribute />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={310}>
+        <Series.Sequence durationInFrames={420}>
           <JuryS5Instant />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={420}>
+        <Series.Sequence durationInFrames={510}>
           <JuryS6Outro />
         </Series.Sequence>
       </Series>

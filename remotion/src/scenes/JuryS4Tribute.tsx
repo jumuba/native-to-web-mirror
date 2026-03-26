@@ -1,100 +1,132 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Img, staticFile } from "remotion";
 import { loadFont } from "@remotion/google-fonts/PlayfairDisplay";
 import { loadFont as loadPoppins } from "@remotion/google-fonts/Poppins";
 
 const { fontFamily: playfair } = loadFont("normal", { weights: ["700"], subsets: ["latin"] });
 const { fontFamily: poppins } = loadPoppins("normal", { weights: ["400", "600"], subsets: ["latin"] });
 
-const familyMembers = [
-  { label: "Mother", emoji: "👩", delay: 0 },
-  { label: "Brothers", emoji: "👦", delay: 12 },
-  { label: "Sisters", emoji: "👧", delay: 24 },
-];
-
 export const JuryS4Tribute = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Phase 1: "Imagine a child..." (0-100)
-  const childOpacity = interpolate(frame, [5, 35], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const childY = interpolate(frame, [5, 35], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const honourOpacity = interpolate(frame, [40, 70], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const honourY = interpolate(frame, [40, 70], [25, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const phase1Fade = interpolate(frame, [95, 115], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Phase 1: "Imagine a child..." (0-120)
+  const childOpacity = interpolate(frame, [5, 40], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const childY = interpolate(frame, [5, 40], [50, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const honourOpacity = interpolate(frame, [45, 80], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const honourY = interpolate(frame, [45, 80], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const phase1Fade = interpolate(frame, [110, 130], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Phase 2: Visual - gathering memories (110-200)
-  const gatherVisible = frame > 105;
+  // Phase 2: Father-child photo with cinematic reveal (120-220)
+  const photoOpacity = interpolate(frame, [125, 160], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const photoScale = interpolate(frame, [125, 170], [0.9, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const kenBurns = interpolate(frame, [125, 600], [1.0, 1.15], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // Phase 3: Gathering elements overlay (200-300)
   const gatherIcons = ["📸", "🎵", "🎤", "📝"];
 
-  // Phase 3: "Something truly meaningful" (190-260)
-  const meaningfulOpacity = interpolate(frame, [195, 225], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const meaningfulFade = interpolate(frame, [255, 275], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Phase 4: "Something truly meaningful" (300-380)
+  const meaningfulOpacity = interpolate(frame, [305, 340], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const meaningfulFade = interpolate(frame, [375, 395], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Phase 4: "Share with family" (270-360)
-  const shareOpacity = interpolate(frame, [275, 305], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const familyVisible = frame > 310;
+  // Phase 5: Family sharing - real photo (390-500)
+  const familyPhotoOpacity = interpolate(frame, [395, 430], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const shareTextOpacity = interpolate(frame, [420, 450], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Phase 5: "Feel and relive together" (360-440)
-  const togetherOpacity = interpolate(frame, [365, 395], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const togetherGlow = interpolate(frame, [395, 450], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Phase 6: "Feel and relive together" (500-580)
+  const togetherOpacity = interpolate(frame, [505, 540], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const togetherGlow = interpolate(frame, [540, 600], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
-  // Phase 6: "Even if not in the same place" (440-510)
-  const evenIfOpacity = interpolate(frame, [440, 470], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  // Phase 7: "Even if not in the same place" (580-650)
+  const evenIfOpacity = interpolate(frame, [585, 620], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-      {/* Subtle warm overlay for emotional tone */}
+    <AbsoluteFill>
+      {/* Cinematic letterbox */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 80, background: "#0D1117", zIndex: 10 }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 80, background: "#0D1117", zIndex: 10 }} />
+
+      {/* Warm emotional overlay */}
       <AbsoluteFill style={{
-        background: `radial-gradient(ellipse at center, rgba(212,168,83,${0.03 + interpolate(frame, [0, 510], [0, 0.05], { extrapolateRight: "clamp" })}) 0%, transparent 70%)`,
+        background: `radial-gradient(ellipse at center, rgba(212,168,83,${0.02 + interpolate(frame, [0, 650], [0, 0.06], { extrapolateRight: "clamp" })}) 0%, transparent 70%)`,
       }} />
 
       {/* Phase 1: Imagine text */}
-      {frame < 120 && (
+      {frame < 135 && (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", zIndex: 5 }}>
+          <div style={{ textAlign: "center", opacity: phase1Fade }}>
+            <div style={{
+              fontSize: 44, fontFamily: poppins, fontWeight: 400, color: "rgba(245,237,227,0.7)",
+              opacity: childOpacity, transform: `translateY(${childY}px)`,
+              marginBottom: 20,
+            }}>
+              Imagine a child
+            </div>
+            <div style={{
+              fontSize: 52, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3",
+              opacity: honourOpacity, transform: `translateY(${honourY}px)`,
+              lineHeight: 1.4,
+            }}>
+              honouring their father
+              <br /><span style={{ color: "#D4A853", fontSize: 44 }}>who passed away</span>
+            </div>
+          </div>
+        </AbsoluteFill>
+      )}
+
+      {/* Phase 2: Father-child photo - cinematic reveal */}
+      {frame > 120 && frame < 400 && (
         <div style={{
-          position: "absolute", textAlign: "center", width: "100%",
-          opacity: phase1Fade,
+          position: "absolute", left: 560, top: 180,
+          width: 800, height: 600,
+          borderRadius: 20,
+          overflow: "hidden",
+          opacity: photoOpacity,
+          transform: `scale(${photoScale})`,
+          boxShadow: "0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,168,83,0.15)",
         }}>
+          <Img
+            src={staticFile("images/father-child.jpg")}
+            style={{
+              width: "100%", height: "100%",
+              objectFit: "cover",
+              transform: `scale(${kenBurns})`,
+              filter: `sepia(0.15) brightness(0.9)`,
+            }}
+          />
+          {/* Emotional vignette */}
           <div style={{
-            fontSize: 42, fontFamily: poppins, fontWeight: 400, color: "rgba(245,237,227,0.8)",
-            opacity: childOpacity, transform: `translateY(${childY}px)`,
-            marginBottom: 16,
-          }}>
-            Imagine a child
-          </div>
-          <div style={{
-            fontSize: 48, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3",
-            opacity: honourOpacity, transform: `translateY(${honourY}px)`,
-            lineHeight: 1.3,
-          }}>
-            honouring their father
-            <br /><span style={{ color: "#D4A853", fontSize: 40 }}>who passed away</span>
-          </div>
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse at center, transparent 40%, rgba(13,17,23,0.6) 100%)",
+          }} />
         </div>
       )}
 
-      {/* Phase 2: Gathering icons */}
-      {gatherVisible && frame < 270 && (
-        <div style={{ position: "absolute", display: "flex", gap: 60, justifyContent: "center", width: "100%" }}>
+      {/* Phase 3: Gathering icons */}
+      {frame > 195 && frame < 400 && (
+        <div style={{
+          position: "absolute", left: 100, top: 300,
+          display: "flex", flexDirection: "column", gap: 30,
+        }}>
           {gatherIcons.map((icon, i) => {
-            const iconSpring = spring({ frame: frame - 115 - i * 12, fps, config: { damping: 12, stiffness: 80 } });
-            const float = Math.sin((frame + i * 30) * 0.05) * 8;
+            const iconSpring = spring({ frame: frame - 205 - i * 15, fps, config: { damping: 12, stiffness: 80 } });
+            const float = Math.sin((frame + i * 30) * 0.04) * 6;
             return (
               <div key={i} style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                transform: `scale(${Math.max(0, iconSpring)}) translateY(${float}px)`,
+                display: "flex", alignItems: "center", gap: 16,
+                transform: `scale(${Math.max(0, iconSpring)}) translateY(${float}px) translateX(${(1 - Math.max(0, iconSpring)) * -80}px)`,
               }}>
                 <div style={{
-                  width: 100, height: 100, borderRadius: 24,
-                  background: "rgba(20,15,35,0.8)",
+                  width: 70, height: 70, borderRadius: 18,
+                  background: "rgba(15,12,28,0.9)",
                   border: "1px solid rgba(212,168,83,0.2)",
                   display: "flex", justifyContent: "center", alignItems: "center",
-                  fontSize: 48, boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                  fontSize: 34, boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
                 }}>
                   {icon}
                 </div>
                 <div style={{
-                  fontSize: 16, fontFamily: poppins, fontWeight: 600,
-                  color: "rgba(245,237,227,0.5)", letterSpacing: 2, textTransform: "uppercase",
+                  fontSize: 18, fontFamily: poppins, fontWeight: 600,
+                  color: "rgba(245,237,227,0.6)", letterSpacing: 2,
                 }}>
                   {["Photos", "Music", "Voice", "Notes"][i]}
                 </div>
@@ -104,86 +136,95 @@ export const JuryS4Tribute = () => {
         </div>
       )}
 
-      {/* Phase 3: Meaningful text */}
-      {frame > 185 && frame < 280 && (
-        <div style={{
-          position: "absolute", textAlign: "center", width: "100%",
-          opacity: meaningfulOpacity * meaningfulFade,
-        }}>
-          <div style={{ fontSize: 46, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3" }}>
-            Creating something
-            <br /><span style={{ color: "#D4A853" }}>truly meaningful</span>
-          </div>
-        </div>
-      )}
-
-      {/* Phase 4: Share with family */}
-      {frame > 265 && frame < 400 && (
-        <div style={{
-          position: "absolute", textAlign: "center", width: "100%",
-          opacity: shareOpacity,
-        }}>
-          <div style={{ fontSize: 38, fontFamily: poppins, fontWeight: 400, color: "rgba(245,237,227,0.7)", marginBottom: 30 }}>
-            And instantly share it with
-          </div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 50 }}>
-            {familyMembers.map((member, i) => {
-              const memberSpring = spring({ frame: frame - 320 - member.delay, fps, config: { damping: 10 } });
-              return (
-                <div key={member.label} style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-                  transform: `scale(${Math.max(0, memberSpring)})`,
-                }}>
-                  <div style={{
-                    width: 90, height: 90, borderRadius: "50%",
-                    background: "rgba(212,168,83,0.15)",
-                    border: "2px solid rgba(212,168,83,0.3)",
-                    display: "flex", justifyContent: "center", alignItems: "center",
-                    fontSize: 42,
-                  }}>
-                    {member.emoji}
-                  </div>
-                  <div style={{ fontSize: 20, fontFamily: poppins, fontWeight: 600, color: "#D4A853" }}>
-                    {member.label}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Phase 5: Feel and relive together */}
-      {frame > 355 && frame < 450 && (
-        <div style={{
-          position: "absolute", textAlign: "center", width: "100%",
-          opacity: togetherOpacity,
-        }}>
+      {/* Phase 4: Meaningful text */}
+      {frame > 295 && frame < 400 && (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", zIndex: 5 }}>
           <div style={{
-            fontSize: 46, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3",
-            textShadow: `0 0 ${40 * togetherGlow}px rgba(212,168,83,${0.5 * togetherGlow})`,
-            lineHeight: 1.4,
+            textAlign: "center",
+            opacity: meaningfulOpacity * meaningfulFade,
           }}>
-            So they can all <span style={{ color: "#D4A853" }}>feel</span> and{" "}
-            <span style={{ color: "#D4A853" }}>relive</span>
-            <br />that moment together
+            <div style={{
+              fontSize: 52, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3",
+              textShadow: "0 4px 30px rgba(0,0,0,0.5)",
+            }}>
+              Creating something
+              <br /><span style={{ color: "#D4A853" }}>truly meaningful</span>
+            </div>
           </div>
-        </div>
+        </AbsoluteFill>
       )}
 
-      {/* Phase 6: Even if not in the same place */}
-      {frame > 430 && (
-        <div style={{
-          position: "absolute", textAlign: "center", width: "100%",
-          opacity: evenIfOpacity,
-        }}>
+      {/* Phase 5: Family sharing photo */}
+      {frame > 390 && frame < 600 && (
+        <>
           <div style={{
-            fontSize: 34, fontFamily: poppins, fontWeight: 400, color: "rgba(245,237,227,0.6)",
-            fontStyle: "italic",
+            position: "absolute", left: 460, top: 160,
+            width: 1000, height: 650,
+            borderRadius: 24,
+            overflow: "hidden",
+            opacity: familyPhotoOpacity,
+            boxShadow: "0 40px 100px rgba(0,0,0,0.6)",
           }}>
-            even if they are not in the same place
+            <Img
+              src={staticFile("images/family-sharing.jpg")}
+              style={{
+                width: "100%", height: "100%",
+                objectFit: "cover",
+                transform: `scale(${interpolate(frame, [395, 600], [1.0, 1.08], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })})`,
+                filter: "brightness(0.85) contrast(1.05)",
+              }}
+            />
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(to top, rgba(13,17,23,0.7) 0%, transparent 50%)",
+            }} />
           </div>
-        </div>
+          <div style={{
+            position: "absolute", left: 480, bottom: 180, zIndex: 5,
+            opacity: shareTextOpacity,
+          }}>
+            <div style={{
+              fontSize: 36, fontFamily: poppins, fontWeight: 600, color: "#F5EDE3",
+              textShadow: "0 2px 20px rgba(0,0,0,0.8)",
+              lineHeight: 1.5,
+            }}>
+              And instantly share it with
+              <br /><span style={{ color: "#D4A853" }}>their mother, brothers, and sisters</span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Phase 6: Feel and relive together */}
+      {frame > 495 && frame < 590 && (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", zIndex: 5 }}>
+          <div style={{ textAlign: "center", opacity: togetherOpacity }}>
+            <div style={{
+              fontSize: 52, fontFamily: playfair, fontWeight: 700, color: "#F5EDE3",
+              textShadow: `0 0 ${50 * togetherGlow}px rgba(212,168,83,${0.6 * togetherGlow}), 0 4px 30px rgba(0,0,0,0.5)`,
+              lineHeight: 1.5,
+            }}>
+              So they can all <span style={{ color: "#D4A853" }}>feel</span> and{" "}
+              <span style={{ color: "#D4A853" }}>relive</span>
+              <br />that moment together
+            </div>
+          </div>
+        </AbsoluteFill>
+      )}
+
+      {/* Phase 7: Even if not in the same place */}
+      {frame > 580 && (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", zIndex: 5 }}>
+          <div style={{ textAlign: "center", opacity: evenIfOpacity }}>
+            <div style={{
+              fontSize: 36, fontFamily: poppins, fontWeight: 400, color: "rgba(245,237,227,0.5)",
+              fontStyle: "italic",
+              textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+            }}>
+              even if they are not in the same place
+            </div>
+          </div>
+        </AbsoluteFill>
       )}
     </AbsoluteFill>
   );
