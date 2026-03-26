@@ -187,6 +187,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
             borderRadius: 38,
             overflow: "hidden",
             margin: "0 auto",
+            position: "relative",
           }}
         >
           {/* Status Bar */}
