@@ -78,14 +78,16 @@ function SideItem({
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
   const [isPressed, setIsPressed] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
 
   return (
     <div
-      className="transition-all duration-300 ease-out hover:scale-105"
+      className="transition-all duration-300 ease-out hover:scale-105 group"
       onClick={onClick}
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
+      onMouseLeave={() => { setIsPressed(false); setIsHovered(false); }}
+      onMouseEnter={() => setIsHovered(true)}
       style={{
         width: 115,
         height: 136,
@@ -113,6 +115,32 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
           pointerEvents: "none",
         }}
       />
+      {/* Hover title overlay */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "16px 6px 6px",
+          background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)",
+          opacity: isHovered ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          pointerEvents: "none",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 9.5,
+            color: "#ffffff",
+            fontWeight: 600,
+            letterSpacing: 0.3,
+            textShadow: "0 1px 3px rgba(0,0,0,0.4)",
+          }}
+        >
+          {title}
+        </span>
+      </div>
     </div>
   );
 }
