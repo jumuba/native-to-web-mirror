@@ -40,7 +40,7 @@ function SideItem({
   onClick,
 }: {
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   active?: boolean;
   singleLine?: boolean;
   onClick?: () => void;
