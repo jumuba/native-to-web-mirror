@@ -78,42 +78,18 @@ function SideItem({
 function Card({ image, title }: { image: string; title: string }) {
   return (
     <div
+      className="transition-transform duration-200 hover:scale-105"
       style={{
         width: 115,
         height: 136,
         borderRadius: 8,
         overflow: "hidden",
-        backgroundColor: "rgba(255,255,255,0.86)",
-        border: "1px solid rgba(224,229,242,0.96)",
         marginBottom: 7,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        cursor: "pointer",
       }}
     >
-      <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: 88, objectFit: "cover", display: "block" }} />
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(255,255,255,0.96)",
-          display: "flex",
-          alignItems: "center",
-          paddingLeft: 8,
-          paddingRight: 8,
-          minHeight: 48,
-          borderBottomLeftRadius: 8,
-          borderBottomRightRadius: 8,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 13.2,
-            color: "#4e4a4a",
-            lineHeight: "15.4px",
-            fontFamily: "serif",
-            fontWeight: 700,
-          }}
-        >
-          {title}
-        </span>
-      </div>
+      <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
     </div>
   );
 }
