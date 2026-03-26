@@ -444,10 +444,8 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
                 />
               </div>
             </div>
-          )}
         </div>
       </div>
-    </div>
     </div>
   );
 }
