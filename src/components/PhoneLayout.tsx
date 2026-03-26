@@ -401,8 +401,53 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
               </div>
             </div>
           </div>
+
+          {/* Album open overlay */}
+          {openedAlbum && (
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                backgroundColor: "rgba(0,0,0,0.6)",
+                borderRadius: 38,
+                zIndex: 50,
+                animation: "albumFadeIn 0.3s ease-out",
+                cursor: "pointer",
+              }}
+              onClick={() => setOpenedAlbum(null)}
+            >
+              <div
+                style={{
+                  width: "75%",
+                  aspectRatio: "3/4",
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+                  animation: "albumZoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  position: "relative",
+                }}
+              >
+                <img
+                  src={openedAlbum.image}
+                  alt={openedAlbum.title}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)",
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
