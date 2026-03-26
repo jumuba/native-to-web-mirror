@@ -75,21 +75,43 @@ function SideItem({
   );
 }
 
-function Card({ image, title }: { image: string; title: string }) {
+function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
+  const [isPressed, setIsPressed] = React.useState(false);
+
   return (
     <div
-      className="transition-transform duration-200 hover:scale-105"
+      className="transition-all duration-300 ease-out hover:scale-105"
+      onClick={onClick}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
       style={{
         width: 115,
         height: 136,
         borderRadius: 8,
         overflow: "hidden",
         marginBottom: 7,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        boxShadow: isPressed
+          ? "0 2px 6px rgba(0,0,0,0.2)"
+          : "0 6px 16px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.08)",
         cursor: "pointer",
+        transform: isPressed ? "scale(0.97)" : undefined,
+        position: "relative",
       }}
     >
       <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      {/* Light reflection overlay */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%, rgba(0,0,0,0.04) 100%)",
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 }
