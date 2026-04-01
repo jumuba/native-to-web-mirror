@@ -115,7 +115,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
   );
 }
 
-export default function PhoneLayout({ cards, customContent }: PhoneLayoutProps) {
+export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [openedAlbum, setOpenedAlbum] = React.useState<{ image: string; title: string } | null>(null);
