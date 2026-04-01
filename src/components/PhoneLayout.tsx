@@ -31,6 +31,7 @@ interface AlbumCard {
 interface PhoneLayoutProps {
   cards: AlbumCard[];
   customContent?: React.ReactNode;
+  overlay?: React.ReactNode;
 }
 
 function SideItem({
