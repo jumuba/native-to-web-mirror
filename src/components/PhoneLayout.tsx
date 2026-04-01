@@ -156,6 +156,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
     { id: "dashboard", label: "Dashboard", icon: <Home size={13} />, path: "/" },
     { id: "memories", label: "My Memories", icon: <ImageIcon size={13} />, path: "/" },
     { id: "photo-albums", label: "Photo Albums", icon: <ImageIcon size={13} />, path: "/photo-albums" },
+    { id: "video-camera", label: "Video Camera", icon: <PlayCircle size={13} />, path: undefined },
     { id: "reminders", label: "Reminders", icon: <Bell size={13} />, path: undefined },
     { id: "profile", label: "My Profile", icon: <User size={13} />, path: undefined },
     { id: "offers", label: "Offers", icon: <Gift size={13} />, path: undefined },
@@ -381,7 +382,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
                     backgroundColor: "rgba(255,255,255,0.48)",
                     border: "1px solid rgba(214,223,241,0.9)",
                     overflow: "hidden",
-                    height: 126,
+                    height: 96,
                   }}
                 >
                   <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
