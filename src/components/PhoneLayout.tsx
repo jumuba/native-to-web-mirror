@@ -90,7 +90,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
       <div
         style={{
           width: 110,
-          height: 90,
+          height: 95,
           borderRadius: "8px 8px 0 0",
           overflow: "hidden",
           position: "relative",
@@ -350,7 +350,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
                     backgroundColor: "rgba(255,255,255,0.48)",
                     border: "1px solid rgba(214,223,241,0.9)",
                     overflow: "hidden",
-                    height: 72,
+                    height: 78,
                   }}
                 >
                   <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
