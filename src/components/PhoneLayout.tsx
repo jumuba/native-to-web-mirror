@@ -30,6 +30,8 @@ interface AlbumCard {
 
 interface PhoneLayoutProps {
   cards: AlbumCard[];
+  customContent?: React.ReactNode;
+  overlay?: React.ReactNode;
 }
 
 function SideItem({
@@ -113,7 +115,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
   );
 }
 
-export default function PhoneLayout({ cards }: PhoneLayoutProps) {
+export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [openedAlbum, setOpenedAlbum] = React.useState<{ image: string; title: string } | null>(null);
@@ -135,6 +137,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
   const getIsActive = (id: string) => {
     if (id === "photo-folders") return currentPath === "/";
     if (id === "photo-albums") return currentPath === "/photo-albums";
+    if (id === "photo-video-edit") return currentPath === "/photo-video-edit";
     return false;
   };
 
@@ -388,17 +391,24 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
                 }}
                 className="[&::-webkit-scrollbar]:hidden"
               >
-                <div
-                  className="flex flex-wrap justify-between"
-                  style={{ paddingBottom: 12 }}
-                >
-                  {cards.map((card) => (
-                    <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
-                  ))}
-                </div>
+                {customContent ? (
+                  customContent
+                ) : (
+                  <div
+                    className="flex flex-wrap justify-between"
+                    style={{ paddingBottom: 12 }}
+                  >
+                    {cards.map((card) => (
+                      <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Custom overlay (e.g. editor) */}
+          {overlay}
 
           {/* Album open overlay */}
           {openedAlbum && (
