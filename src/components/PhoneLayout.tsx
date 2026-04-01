@@ -85,7 +85,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
         width: 110,
         marginBottom: 14,
         cursor: "pointer",
-      }
+      }}
     >
       <div
         style={{
