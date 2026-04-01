@@ -104,7 +104,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
           backgroundColor: "#ffffff",
           borderRadius: "0 0 8px 8px",
           padding: "4px 6px",
-          minHeight: 22,
+          minHeight: 28,
         }}
       >
         <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{title}</span>
