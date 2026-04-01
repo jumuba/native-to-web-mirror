@@ -90,7 +90,7 @@ function Card({ image, title, onClick }: { image: string; title: string; onClick
       <div
         style={{
           width: 110,
-          height: 90,
+          height: 95,
           borderRadius: "8px 8px 0 0",
           overflow: "hidden",
           position: "relative",
