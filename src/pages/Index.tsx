@@ -1,20 +1,54 @@
+import React, { useState } from "react";
 import PhoneLayout from "@/components/PhoneLayout";
-import cardBirthdays from "@/assets/card_birthdays.png";
-import cardBirthRobert from "@/assets/card_birth_robert.png";
-import cardFamily from "@/assets/card_family.png";
-import cardFriends from "@/assets/card_friends.png";
-import cardHolidays from "@/assets/card_holidays.png";
-import cardChristmas from "@/assets/card_christmas.png";
+import FolderDetail from "@/components/screens/FolderDetail";
+import { mockFolders, type Folder } from "@/lib/mockData";
 
-const albumCards = [
-  { id: "birthdays", title: "Birthdays", image: cardBirthdays },
-  { id: "birth-robert", title: "Birth of Robert", image: cardBirthRobert },
-  { id: "family", title: "Family", image: cardFamily },
-  { id: "friends", title: "Friends", image: cardFriends },
-  { id: "holidays", title: "Holidays", image: cardHolidays },
-  { id: "christmas", title: "Christmas", image: cardChristmas },
-];
+function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
+  return (
+    <div
+      className="transition-all duration-200 ease-out hover:scale-[1.03]"
+      onClick={onClick}
+      style={{ width: 110, marginBottom: 14, cursor: "pointer" }}
+    >
+      <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
+        <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      </div>
+      <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
+        <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{title}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function Index() {
-  return <PhoneLayout cards={albumCards} />;
+  const [selectedFolder, setSelectedFolder] = useState<Folder | null>(null);
+
+  if (selectedFolder) {
+    return (
+      <PhoneLayout
+        cards={[]}
+        customContent={
+          <FolderDetail folder={selectedFolder} onBack={() => setSelectedFolder(null)} />
+        }
+      />
+    );
+  }
+
+  return (
+    <PhoneLayout
+      cards={[]}
+      customContent={
+        <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12 }}>
+          {mockFolders.map((folder) => (
+            <Card
+              key={folder.id}
+              image={folder.image}
+              title={folder.title}
+              onClick={() => setSelectedFolder(folder)}
+            />
+          ))}
+        </div>
+      }
+    />
+  );
 }
