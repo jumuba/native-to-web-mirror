@@ -386,6 +386,12 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
           <CreateImportSheet
             open={showCreateImport}
             onClose={() => setShowCreateImport(false)}
+            onCreateFolder={(data) => {
+              console.log("Folder created:", data);
+            }}
+            onCreateAlbum={(data) => {
+              console.log("Album created:", data);
+            }}
           />
 
           {/* Album open overlay */}
