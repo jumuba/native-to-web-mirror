@@ -390,14 +390,18 @@ export default function PhoneLayout({ cards, customContent }: PhoneLayoutProps) 
                 }}
                 className="[&::-webkit-scrollbar]:hidden"
               >
-                <div
-                  className="flex flex-wrap justify-between"
-                  style={{ paddingBottom: 12 }}
-                >
-                  {cards.map((card) => (
-                    <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
-                  ))}
-                </div>
+                {customContent ? (
+                  customContent
+                ) : (
+                  <div
+                    className="flex flex-wrap justify-between"
+                    style={{ paddingBottom: 12 }}
+                  >
+                    {cards.map((card) => (
+                      <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
