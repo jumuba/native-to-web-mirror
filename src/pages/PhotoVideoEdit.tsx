@@ -552,9 +552,14 @@ export default function PhotoVideoEdit() {
   );
 
   return (
-    <>
-      <PhoneLayout cards={[]} customContent={customContent} />
-      {/* Editor overlay rendered outside PhoneLayout to cover the phone screen */}
-    </>
+    <PhoneLayout
+      cards={[]}
+      customContent={customContent}
+      overlay={
+        editorMode ? (
+          <EditorOverlay mode={editorMode} onClose={() => setEditorMode(null)} />
+        ) : null
+      }
+    />
   );
 }
