@@ -407,6 +407,9 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
             </div>
           </div>
 
+          {/* Custom overlay (e.g. editor) */}
+          {overlay}
+
           {/* Album open overlay */}
           {openedAlbum && (
             <div
