@@ -165,7 +165,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
   ];
 
   const getIsActive = (id: string) => {
-    if (id === "memories") return currentPath === "/";
+    if (id === "photo-folders") return currentPath === "/";
     if (id === "photo-albums") return currentPath === "/photo-albums";
     return false;
   };
