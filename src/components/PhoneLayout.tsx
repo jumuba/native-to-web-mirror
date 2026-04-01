@@ -77,69 +77,37 @@ function SideItem({
 }
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
-  const [isPressed, setIsPressed] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-
   return (
     <div
-      className="transition-all duration-300 ease-out hover:scale-105 group"
+      className="transition-all duration-200 ease-out hover:scale-[1.03]"
       onClick={onClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => { setIsPressed(false); setIsHovered(false); }}
-      onMouseEnter={() => setIsHovered(true)}
       style={{
-        width: 115,
-        height: 136,
-        borderRadius: 8,
-        overflow: "hidden",
-        marginBottom: 7,
-        boxShadow: isPressed
-          ? "0 2px 6px rgba(0,0,0,0.2)"
-          : "0 6px 16px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.08)",
+        width: 110,
+        marginBottom: 10,
         cursor: "pointer",
-        transform: isPressed ? "scale(0.97)" : undefined,
-        position: "relative",
       }}
     >
-      <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-      {/* Light reflection overlay */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%, rgba(0,0,0,0.04) 100%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Hover title overlay */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "16px 6px 6px",
-          background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)",
-          opacity: isHovered ? 1 : 0,
-          transition: "opacity 0.3s ease",
-          pointerEvents: "none",
+          width: 110,
+          height: 90,
+          borderRadius: "8px 8px 0 0",
+          overflow: "hidden",
+          position: "relative",
         }}
       >
-        <span
-          style={{
-            fontSize: 9.5,
-            color: "#ffffff",
-            fontWeight: 600,
-            letterSpacing: 0.3,
-            textShadow: "0 1px 3px rgba(0,0,0,0.4)",
-          }}
-        >
-          {title}
-        </span>
+        <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      </div>
+      <div
+        style={{
+          width: 110,
+          backgroundColor: "#ffffff",
+          borderRadius: "0 0 8px 8px",
+          padding: "4px 6px",
+          minHeight: 22,
+        }}
+      >
+        <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{title}</span>
       </div>
     </div>
   );
@@ -154,9 +122,9 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
 
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home size={13} />, path: "/" },
-    { id: "memories", label: "My Memories", icon: <ImageIcon size={13} />, path: "/" },
+    { id: "photo-folders", label: "Photo Folders", icon: <ImageIcon size={13} />, path: "/" },
     { id: "photo-albums", label: "Photo Albums", icon: <ImageIcon size={13} />, path: "/photo-albums" },
-    { id: "video-camera", label: "Video Camera", icon: <PlayCircle size={13} />, path: undefined },
+    { id: "photo-video-edit", label: "Photo Video Edit", icon: <PlayCircle size={13} />, path: "/photo-video-edit" },
     { id: "reminders", label: "Reminders", icon: <Bell size={13} />, path: undefined },
     { id: "profile", label: "My Profile", icon: <User size={13} />, path: undefined },
     { id: "offers", label: "Offers", icon: <Gift size={13} />, path: undefined },
@@ -165,7 +133,7 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
   ];
 
   const getIsActive = (id: string) => {
-    if (id === "memories") return currentPath === "/";
+    if (id === "photo-folders") return currentPath === "/";
     if (id === "photo-albums") return currentPath === "/photo-albums";
     return false;
   };
