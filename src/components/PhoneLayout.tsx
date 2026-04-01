@@ -154,9 +154,9 @@ export default function PhoneLayout({ cards }: PhoneLayoutProps) {
 
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: <Home size={13} />, path: "/" },
-    { id: "memories", label: "My Memories", icon: <ImageIcon size={13} />, path: "/" },
+    { id: "photo-folders", label: "Photo Folders", icon: <ImageIcon size={13} />, path: "/" },
     { id: "photo-albums", label: "Photo Albums", icon: <ImageIcon size={13} />, path: "/photo-albums" },
-    { id: "video-camera", label: "Video Camera", icon: <PlayCircle size={13} />, path: undefined },
+    { id: "photo-video-edit", label: "Photo Video Edit", icon: <PlayCircle size={13} />, path: "/photo-video-edit" },
     { id: "reminders", label: "Reminders", icon: <Bell size={13} />, path: undefined },
     { id: "profile", label: "My Profile", icon: <User size={13} />, path: undefined },
     { id: "offers", label: "Offers", icon: <Gift size={13} />, path: undefined },
