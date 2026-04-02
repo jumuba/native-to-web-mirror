@@ -60,6 +60,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [showMenu, setShowMenu] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
+  const [coverPickerSource, setCoverPickerSource] = useState<"main" | "folders" | "albums">("main");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
