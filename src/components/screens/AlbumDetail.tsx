@@ -69,8 +69,19 @@ const MARRIAGE_DEMO_PAGES: PageItem[][] = [
 
 // Build album pages from photos + content items
 function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): PageItem[][] {
-  if (isMarriage && photos.length === 0 && items.length === 0) {
-    return MARRIAGE_DEMO_PAGES;
+  if (isMarriage) {
+    // For marriage albums, show demo scrapbook pages first, then any user-added content
+    const userItems: PageItem[] = [
+      ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
+      ...items,
+    ];
+    const extraPages: PageItem[][] = [];
+    let i = 0;
+    while (i < userItems.length) {
+      extraPages.push(userItems.slice(i, i + 2));
+      i += 2;
+    }
+    return [...MARRIAGE_DEMO_PAGES, ...extraPages];
   }
   const allItems: PageItem[] = [
     ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
