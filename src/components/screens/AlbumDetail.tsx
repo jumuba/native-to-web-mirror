@@ -454,6 +454,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <ImageIcon size={11} color="#687287" />, label: "Photo", action: handleAddPhotos },
           { icon: <MessageSquare size={11} color="#687287" />, label: "Note", action: () => setShowNoteInput(!showNoteInput) },
           { icon: <Music size={11} color="#687287" />, label: "Music", action: () => setShowMusicInput(!showMusicInput) },
+          { icon: <Video size={11} color="#687287" />, label: "Video", action: handleAddVideo },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
             background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
