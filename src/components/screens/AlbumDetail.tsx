@@ -70,7 +70,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
   const [musicUrl, setMusicUrl] = useState("");
-
+  const videoInputRef = useRef<HTMLInputElement>(null);
   // Extra content items added to pages
   const [extraItems, setExtraItems] = useState<PageItem[]>(() => {
     const items: PageItem[] = [];
