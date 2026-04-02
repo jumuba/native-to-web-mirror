@@ -16,6 +16,7 @@ interface FolderDetailProps {
 type SortMode = "date" | "place" | "event";
 
 export default function FolderDetail({ folder, onBack, onDelete, onRename, onImportPhotos, onChangeCover }: FolderDetailProps) {
+  const { folders, albums } = useAppState();
   const [sort, setSort] = useState<SortMode>("date");
   const [showMenu, setShowMenu] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -25,9 +26,11 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
+  const [coverPickerSource, setCoverPickerSource] = useState<"main" | "folders" | "albums">("main");
   const [addingPhoto, setAddingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const photos = folder.photos;
   const sorted = [...photos].sort((a, b) => {
