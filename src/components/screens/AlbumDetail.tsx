@@ -23,6 +23,7 @@ type PageItem = {
   type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting" | "money" | "voucher";
   content: string;
   id: string;
+  label?: string;
 };
 
 const EMOJI_LIST = ["❤️", "😍", "🎉", "🥳", "🎂", "🌟", "💐", "🎶", "😂", "🥰", "👏", "🙌", "💕", "✨", "🎁", "🌺", "😊", "🤗", "💖", "🔥", "👶", "💒", "🎵", "🌈"];
@@ -36,8 +37,41 @@ const GIF_LIST = [
   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWI3dXdzaHhjYnplOXBtNndwcjlqZjV5OXU2cG9lOHNtdzFjdHRkZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0MYt5jPR6QX5pnqM/giphy.gif",
 ];
 
+
+const MARRIAGE_DEMO_PAGES: PageItem[][] = [
+  // Page 1: Note
+  [{ type: "note", content: "Happy Marriage to David & Ariane 💒✨\nWishing you a lifetime of love and happiness together!", id: "demo-note-1" }],
+  // Page 2: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p1" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop", id: "demo-p2" },
+  ],
+  // Page 3: Video
+  [{ type: "video", content: "https://www.w3schools.com/html/mov_bbb.mp4", id: "demo-video-1", label: "🎬 Click to watch the wedding video" }],
+  // Page 4: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=300&fit=crop", id: "demo-p3" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=300&fit=crop", id: "demo-p4" },
+  ],
+  // Page 5: Large GIF
+  [{ type: "gif", content: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWd6MmVwbTl5ZnFzNXNhN2h4bHlhNXA2OGN5MGtzZXR6enoyeWN1aCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlBO7eyXzSZkJri/giphy.gif", id: "demo-gif-1", label: "🎉 Happy Marriage!" }],
+  // Page 6: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=300&fit=crop", id: "demo-p5" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=400&h=300&fit=crop", id: "demo-p6" },
+  ],
+  // Page 7: Music + Voucher
+  [
+    { type: "music", content: "A Thousand Years – Christina Perri", id: "demo-music-1", label: "🎵 Click to listen to the music" },
+    { type: "voucher", content: "🎟️ Gift Voucher — €200 Spa Weekend for the newlyweds!", id: "demo-voucher-1" },
+  ],
+];
+
 // Build album pages from photos + content items
-function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[]): PageItem[][] {
+function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): PageItem[][] {
+  if (isMarriage && photos.length === 0 && items.length === 0) {
+    return MARRIAGE_DEMO_PAGES;
+  }
   const allItems: PageItem[] = [
     ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
     ...items,
@@ -46,7 +80,6 @@ function buildPages(photos: { id: string; url: string; title: string }[], items:
   const pages: PageItem[][] = [];
   let i = 0;
   while (i < allItems.length) {
-    // 2 items per page max for album feel
     pages.push(allItems.slice(i, i + 2));
     i += 2;
   }
@@ -87,7 +120,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const recordingIntervalRef = useRef<number | null>(null);
 
   const photos = album.photos;
-  const pages = buildPages(photos, extraItems);
+  const isMarriage = album.title.toLowerCase().includes("marriage") || album.title.toLowerCase().includes("wedding");
+  const pages = buildPages(photos, extraItems, isMarriage);
   const totalPages = pages.length;
 
   useEffect(() => {
@@ -220,69 +254,99 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     setShowShareSheet(false);
   };
 
-  const renderPageItem = (item: PageItem) => {
+  const renderPageItem = (item: PageItem, isFullPage: boolean = false) => {
+    const photoHeight = isFullPage ? 130 : 100;
     switch (item.type) {
       case "photo":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", marginBottom: 6 }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.15)", marginBottom: 8, border: "3px solid #fff", transform: "rotate(-0.5deg)" }}>
+            <img src={item.content} alt="" style={{ width: "100%", height: photoHeight, objectFit: "cover", display: "block" }} />
           </div>
         );
       case "note":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fffbe6", borderRadius: 6, padding: "6px 8px", marginBottom: 6, border: "1px solid #f0e6b8", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-            <p style={{ fontSize: 9, color: "#5a4e1a", margin: 0, fontStyle: "italic" }}>📝 {item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#fffdf0", borderRadius: 10, padding: "14px 16px", marginBottom: 8,
+            border: "1px solid #f0e6b8", boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            backgroundImage: "repeating-linear-gradient(transparent, transparent 18px, #e8dfc0 18px, #e8dfc0 19px)",
+            minHeight: isFullPage ? 140 : undefined,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <p style={{ fontSize: 12, color: "#5a4e1a", margin: 0, fontStyle: "italic", textAlign: "center", lineHeight: 1.6, fontWeight: 600, whiteSpace: "pre-line" }}>
+              📝 {item.content}
+            </p>
           </div>
         );
       case "emoji":
         return (
-          <div key={item.id} className="flex items-center justify-center" style={{ marginBottom: 6 }}>
-            <span style={{ fontSize: 32 }}>{item.content}</span>
+          <div key={item.id} className="flex items-center justify-center" style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 36 }}>{item.content}</span>
           </div>
         );
       case "gif":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6 }}>
-            <img src={item.content} alt="GIF" style={{ width: "100%", height: 80, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", marginBottom: 8, textAlign: "center" }}>
+            {item.label && <p style={{ fontSize: 11, fontWeight: 700, color: "#9d174d", margin: "0 0 6px", textAlign: "center" }}>{item.label}</p>}
+            <img src={item.content} alt="GIF" style={{ width: "100%", height: isFullPage ? 160 : 90, objectFit: "cover", display: "block", borderRadius: 8, border: "3px solid #f9a8d4" }} />
           </div>
         );
       case "voice":
         return (
-          <div key={item.id} style={{ backgroundColor: "#eef2fb", borderRadius: 6, padding: "6px 8px", marginBottom: 6 }}>
-            <p style={{ fontSize: 9, color: "#394460", margin: 0 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#eef2fb", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
+            <p style={{ fontSize: 10, color: "#394460", margin: 0 }}>{item.content}</p>
           </div>
         );
       case "music":
         return (
-          <div key={item.id} style={{ backgroundColor: "#f0eeff", borderRadius: 6, padding: "6px 8px", marginBottom: 6, border: "1px solid #d8d0f8" }}>
-            <p style={{ fontSize: 9, color: "#5b4fa0", margin: 0 }}>🎵 {item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#f0eeff", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
+            border: "2px solid #d8d0f8", textAlign: "center", cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          }}>
+            <p style={{ fontSize: 22, margin: "0 0 4px" }}>🎵</p>
+            <p style={{ fontSize: 10, color: "#5b4fa0", margin: 0, fontWeight: 700 }}>{item.label || item.content}</p>
+            <p style={{ fontSize: 8, color: "#8b7fd0", margin: "3px 0 0" }}>Tap to play</p>
           </div>
         );
       case "video":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
-            <video src={item.content} controls style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{
+            width: "100%", borderRadius: 10, overflow: "hidden", marginBottom: 8,
+            boxShadow: "0 3px 12px rgba(0,0,0,0.15)", textAlign: "center",
+            backgroundColor: "#1a1a2e", position: "relative",
+          }}>
+            {item.label && (
+              <p style={{ fontSize: 10, fontWeight: 700, color: "#fff", padding: "8px 8px 4px", margin: 0, backgroundColor: "rgba(0,0,0,0.6)" }}>
+                {item.label}
+              </p>
+            )}
+            <video src={item.content} controls poster="" style={{ width: "100%", height: isFullPage ? 140 : 100, objectFit: "cover", display: "block" }} />
           </div>
         );
       case "greeting":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>💌</p>
-            <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 18, margin: 0 }}>💌</p>
+            <p style={{ fontSize: 10, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       case "money":
         return (
-          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>💰</p>
-            <p style={{ fontSize: 9, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 18, margin: 0 }}>💰</p>
+            <p style={{ fontSize: 10, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       case "voucher":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fefce8", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #fde047", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>🎟️</p>
-            <p style={{ fontSize: 9, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#fefce8", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
+            border: "2px dashed #fbbf24", textAlign: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            backgroundImage: "radial-gradient(circle at 0% 50%, transparent 8px, #fefce8 8px), radial-gradient(circle at 100% 50%, transparent 8px, #fefce8 8px)",
+          }}>
+            <p style={{ fontSize: 18, margin: 0 }}>🎟️</p>
+            <p style={{ fontSize: 10, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       default:
@@ -549,39 +613,46 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* ── Album Page View ── */}
+      {/* ── Album Page View (Scrapbook) ── */}
       <div style={{
-        backgroundColor: "#faf8f5", borderRadius: 8, border: "1px solid #e8e2d8",
-        minHeight: 160, position: "relative", padding: "8px 10px",
-        boxShadow: "inset 0 1px 4px rgba(0,0,0,0.06), 2px 2px 8px rgba(0,0,0,0.08)",
+        backgroundColor: "#faf8f5", borderRadius: 10, border: "2px solid #e8e2d8",
+        minHeight: 200, position: "relative", padding: "12px 14px",
+        boxShadow: "inset 0 2px 6px rgba(0,0,0,0.06), 3px 3px 12px rgba(0,0,0,0.1)",
+        backgroundImage: "linear-gradient(90deg, transparent 49.5%, rgba(0,0,0,0.04) 49.5%, rgba(0,0,0,0.04) 50.5%, transparent 50.5%)",
       }}>
-        {/* Page spine effect */}
-        <div style={{ position: "absolute", left: "50%", top: 4, bottom: 4, width: 1, backgroundColor: "rgba(0,0,0,0.06)" }} />
+        {/* Page corner fold effect */}
+        <div style={{
+          position: "absolute", top: 0, right: 0, width: 16, height: 16,
+          background: "linear-gradient(135deg, #faf8f5 50%, #e8e2d8 50%)",
+          borderRadius: "0 10px 0 0",
+        }} />
 
         {totalPages === 0 || (currentPageItems.length === 0 && photos.length === 0) ? (
-          <div className="flex flex-col items-center justify-center" style={{ minHeight: 140 }}>
-            <ImageIcon size={20} color="#c0c8d8" style={{ marginBottom: 4 }} />
-            <span style={{ fontSize: 9, color: "#8fa9dd", fontWeight: 600 }}>Empty album</span>
-            <span style={{ fontSize: 7, color: "#a0a8b8" }}>Add photos, notes, GIFs using the toolbar above</span>
+          <div className="flex flex-col items-center justify-center" style={{ minHeight: 170 }}>
+            <ImageIcon size={24} color="#c0c8d8" style={{ marginBottom: 6 }} />
+            <span style={{ fontSize: 10, color: "#8fa9dd", fontWeight: 600 }}>Empty album</span>
+            <span style={{ fontSize: 8, color: "#a0a8b8" }}>Add photos, notes, GIFs using the toolbar above</span>
           </div>
         ) : (
-          <div>
-            {currentPageItems.map((item) => renderPageItem(item))}
+          <div style={{ minHeight: 170 }}>
+            {currentPageItems.map((item) => renderPageItem(item, currentPageItems.length === 1))}
           </div>
         )}
 
         {/* Page navigation */}
-        <div className="flex items-center justify-between" style={{ marginTop: 6 }}>
+        <div className="flex items-center justify-between" style={{ marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <button onClick={goPrev} disabled={currentPage === 0} style={{
             background: "none", border: "none", cursor: currentPage === 0 ? "default" : "pointer", opacity: currentPage === 0 ? 0.3 : 1,
+            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage === 0 ? "transparent" : "#e8ecf4",
           }}>
-            <ChevronLeft size={14} color="#687287" />
+            <ChevronLeft size={16} color="#687287" />
           </button>
-          <span style={{ fontSize: 7, color: "#a0a8b8" }}>Page {currentPage + 1} / {Math.max(1, totalPages)}</span>
+          <span style={{ fontSize: 8, color: "#a0a8b8", fontWeight: 600 }}>Page {currentPage + 1} / {Math.max(1, totalPages)}</span>
           <button onClick={goNext} disabled={currentPage >= totalPages - 1} style={{
             background: "none", border: "none", cursor: currentPage >= totalPages - 1 ? "default" : "pointer", opacity: currentPage >= totalPages - 1 ? 0.3 : 1,
+            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage >= totalPages - 1 ? "transparent" : "#e8ecf4",
           }}>
-            <ChevronRight size={14} color="#687287" />
+            <ChevronRight size={16} color="#687287" />
           </button>
         </div>
       </div>
