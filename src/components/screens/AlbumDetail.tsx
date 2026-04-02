@@ -23,21 +23,44 @@ type PageItem = {
   type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting" | "money" | "voucher";
   content: string;
   id: string;
+  label?: string;
 };
 
-const EMOJI_LIST = ["❤️", "😍", "🎉", "🥳", "🎂", "🌟", "💐", "🎶", "😂", "🥰", "👏", "🙌", "💕", "✨", "🎁", "🌺", "😊", "🤗", "💖", "🔥", "👶", "💒", "🎵", "🌈"];
-
-const GIF_LIST = [
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWd6MmVwbTl5ZnFzNXNhN2h4bHlhNXA2OGN5MGtzZXR6enoyeWN1aCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlBO7eyXzSZkJri/giphy.gif",
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcm5kNGF3d2FvMWR1aGdtOGE3YWFnZ2dtbjBwcTgwa3RzM2xhNnhjdyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oEjI6SIIHBdRxXI40/giphy.gif",
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHB6bTVxOXF4NWRiMHVtYjl2M3VldGV6NXN6N2M0cHRzNnhtZ3p0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l4FGuhL4U2WSOlhfi/giphy.gif",
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWgxMWsxcWxsMHk5NXlpcTN2bHpuMmVtYnlqdjFuaHFkbGVscng1eCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xT9IgG50Fb7Mi0prBC/giphy.gif",
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWV6cnB3MXkzMWR4Y3E1NjIwY2NiY2VhYjl5cXpuY2VnZnJ0NjVyZSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26BRv0ThflsHCqDrG/giphy.gif",
-  "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWI3dXdzaHhjYnplOXBtNndwcjlqZjV5OXU2cG9lOHNtdzFjdHRkZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0MYt5jPR6QX5pnqM/giphy.gif",
+// Pre-built demo pages for marriage album
+const MARRIAGE_DEMO_PAGES: PageItem[][] = [
+  // Page 1: Note
+  [{ type: "note", content: "Happy Marriage to David & Ariane 💒✨\nWishing you a lifetime of love and happiness together!", id: "demo-note-1" }],
+  // Page 2: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p1" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop", id: "demo-p2" },
+  ],
+  // Page 3: Video
+  [{ type: "video", content: "https://www.w3schools.com/html/mov_bbb.mp4", id: "demo-video-1", label: "🎬 Click to watch the wedding video" }],
+  // Page 4: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=300&fit=crop", id: "demo-p3" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=300&fit=crop", id: "demo-p4" },
+  ],
+  // Page 5: Large GIF
+  [{ type: "gif", content: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWd6MmVwbTl5ZnFzNXNhN2h4bHlhNXA2OGN5MGtzZXR6enoyeWN1aCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlBO7eyXzSZkJri/giphy.gif", id: "demo-gif-1", label: "🎉 Happy Marriage!" }],
+  // Page 6: 2 photos
+  [
+    { type: "photo", content: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=300&fit=crop", id: "demo-p5" },
+    { type: "photo", content: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=400&h=300&fit=crop", id: "demo-p6" },
+  ],
+  // Page 7: Music + Voucher
+  [
+    { type: "music", content: "A Thousand Years – Christina Perri", id: "demo-music-1", label: "🎵 Click to listen to the music" },
+    { type: "voucher", content: "🎟️ Gift Voucher — €200 Spa Weekend for the newlyweds!", id: "demo-voucher-1" },
+  ],
 ];
 
 // Build album pages from photos + content items
-function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[]): PageItem[][] {
+function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): PageItem[][] {
+  if (isMarriage && photos.length === 0 && items.length === 0) {
+    return MARRIAGE_DEMO_PAGES;
+  }
   const allItems: PageItem[] = [
     ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
     ...items,
@@ -46,7 +69,6 @@ function buildPages(photos: { id: string; url: string; title: string }[], items:
   const pages: PageItem[][] = [];
   let i = 0;
   while (i < allItems.length) {
-    // 2 items per page max for album feel
     pages.push(allItems.slice(i, i + 2));
     i += 2;
   }
