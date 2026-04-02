@@ -253,6 +253,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" style={{ display: "none" }} onChange={handleFilesSelected} />
       <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverFromFile} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={handleCoverFromFile} />
 
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
