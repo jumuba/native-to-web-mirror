@@ -53,6 +53,7 @@ function buildPages(photos: { id: string; url: string; title: string }[], items:
 }
 
 export default function AlbumDetail({ album, onBack, onDelete, onRename, onImportPhotos, onChangeCover, onUpdateAlbum }: AlbumDetailProps) {
+  const { folders, albums } = useAppState();
   const [liked, setLiked] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [title, setTitle] = useState(album.title);
