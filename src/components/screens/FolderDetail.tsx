@@ -80,7 +80,7 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
   const handleShare = async (type: "folder" | "photos") => {
     const title = type === "folder" ? `Folder: ${name}` : `${selectedPhotos.size} selected photos`;
     if (navigator.share) {
-      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory!`, url: window.location.href }); } catch {}
+      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory App!`, url: window.location.href }); } catch {}
     } else {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied!");
@@ -337,7 +337,13 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
         <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 10, borderRadius: 38, overflow: "hidden" }}>
           <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => setShowShareSheet(false)} />
           <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "12px 12px 0 0", padding: "12px 14px 20px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#394460", marginBottom: 8 }}>Share</p>
+            <div className="flex items-center" style={{ marginBottom: 8, gap: 6 }}>
+              <button onClick={() => setShowShareSheet(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
+                <ChevronLeft size={14} color="#394460" />
+              </button>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
+              <span style={{ fontSize: 8, color: "#687287", marginLeft: "auto" }}>SmartMemory App</span>
+            </div>
             <div className="flex flex-col" style={{ gap: 6 }}>
               <button onClick={() => handleShare("folder")}
                 style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
