@@ -471,6 +471,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <span style={{ fontSize: 12 }}>🎞️</span>, label: "GIF", action: () => setShowGifPicker(!showGifPicker) },
           { icon: <Smile size={11} color="#687287" />, label: "Emoji", action: () => setShowEmojiPicker(!showEmojiPicker) },
           { icon: isRecording ? <MicOff size={11} color="#ef4444" /> : <Mic size={11} color="#687287" />, label: isRecording ? `${recordingTime}s` : "Voice", action: isRecording ? stopRecording : startRecording },
+          { icon: <Mail size={11} color="#687287" />, label: "Card", action: handleAddGreetingCard },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
             background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
