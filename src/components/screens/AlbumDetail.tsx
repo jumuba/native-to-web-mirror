@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   ChevronLeft, ChevronRight, Share2, Download, Music, MessageSquare,
   Smile, Mic, Heart, ImageIcon, Plus, Users, Lock,
-  Edit3, Trash2, MoreVertical, MicOff, Camera,
+  Edit3, Trash2, MoreVertical, MicOff, Camera, Video, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Album, Note } from "@/lib/mockData";
@@ -19,7 +19,7 @@ interface AlbumDetailProps {
 }
 
 type PageItem = {
-  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video";
+  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting";
   content: string;
   id: string;
 };
@@ -70,7 +70,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
   const [musicUrl, setMusicUrl] = useState("");
-
+  const videoInputRef = useRef<HTMLInputElement>(null);
   // Extra content items added to pages
   const [extraItems, setExtraItems] = useState<PageItem[]>(() => {
     const items: PageItem[] = [];
@@ -163,6 +163,21 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     toast.success("Music added!");
   };
 
+  const handleAddVideo = () => videoInputRef.current?.click();
+  const handleVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setExtraItems((prev) => [...prev, { type: "video", content: url, id: `video-${Date.now()}` }]);
+    toast.success("Video added!");
+    e.target.value = "";
+  };
+
+  const handleAddGreetingCard = () => {
+    setExtraItems((prev) => [...prev, { type: "greeting", content: "🎉 Happy Celebration!", id: `greeting-${Date.now()}` }]);
+    toast.success("Greeting card added!");
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -242,6 +257,19 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <p style={{ fontSize: 9, color: "#5b4fa0", margin: 0 }}>🎵 {item.content}</p>
           </div>
         );
+      case "video":
+        return (
+          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
+            <video src={item.content} controls style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          </div>
+        );
+      case "greeting":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>💌</p>
+            <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
       default:
         return null;
     }
@@ -254,6 +282,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" style={{ display: "none" }} onChange={handleFilesSelected} />
       <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverFromFile} />
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={handleCoverFromFile} />
+      <input ref={videoInputRef} type="file" accept="video/*" style={{ display: "none" }} onChange={handleVideoSelected} />
 
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
@@ -425,6 +454,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <ImageIcon size={11} color="#687287" />, label: "Photo", action: handleAddPhotos },
           { icon: <MessageSquare size={11} color="#687287" />, label: "Note", action: () => setShowNoteInput(!showNoteInput) },
           { icon: <Music size={11} color="#687287" />, label: "Music", action: () => setShowMusicInput(!showMusicInput) },
+          { icon: <Video size={11} color="#687287" />, label: "Video", action: handleAddVideo },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
             background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
@@ -441,6 +471,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <span style={{ fontSize: 12 }}>🎞️</span>, label: "GIF", action: () => setShowGifPicker(!showGifPicker) },
           { icon: <Smile size={11} color="#687287" />, label: "Emoji", action: () => setShowEmojiPicker(!showEmojiPicker) },
           { icon: isRecording ? <MicOff size={11} color="#ef4444" /> : <Mic size={11} color="#687287" />, label: isRecording ? `${recordingTime}s` : "Voice", action: isRecording ? stopRecording : startRecording },
+          { icon: <Mail size={11} color="#687287" />, label: "Card", action: handleAddGreetingCard },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
             background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
