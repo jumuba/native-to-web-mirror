@@ -257,6 +257,19 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <p style={{ fontSize: 9, color: "#5b4fa0", margin: 0 }}>🎵 {item.content}</p>
           </div>
         );
+      case "video":
+        return (
+          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
+            <video src={item.content} controls style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          </div>
+        );
+      case "greeting":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>💌</p>
+            <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
       default:
         return null;
     }
