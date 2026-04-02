@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AppStateProvider } from "@/lib/AppStateContext";
 import Index from "./pages/Index.tsx";
 import PhotoAlbums from "./pages/PhotoAlbums.tsx";
 import PhotoVideoEdit from "./pages/PhotoVideoEdit.tsx";
@@ -15,15 +16,16 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/photo-albums" element={<PhotoAlbums />} />
-          <Route path="/photo-video-edit" element={<PhotoVideoEdit />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AppStateProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/photo-albums" element={<PhotoAlbums />} />
+            <Route path="/photo-video-edit" element={<PhotoVideoEdit />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AppStateProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

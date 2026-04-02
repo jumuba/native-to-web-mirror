@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { ChevronLeft, ArrowUpDown, Plus, Trash2, Edit3, Lock, Share2, Palette, MoreVertical, ImageIcon } from "lucide-react";
+import { ChevronLeft, ArrowUpDown, Plus, Trash2, Edit3, Lock, Share2, Palette, MoreVertical, ImageIcon, Camera } from "lucide-react";
 import { toast } from "sonner";
 import type { Folder, Photo } from "@/lib/mockData";
 
@@ -9,47 +9,39 @@ interface FolderDetailProps {
   onDelete?: () => void;
   onRename?: (newName: string) => void;
   onImportPhotos?: (files: File[]) => void;
+  onChangeCover?: (image: string) => void;
 }
 
 type SortMode = "date" | "place" | "event";
 
-export default function FolderDetail({ folder, onBack, onDelete, onRename, onImportPhotos }: FolderDetailProps) {
+export default function FolderDetail({ folder, onBack, onDelete, onRename, onImportPhotos, onChangeCover }: FolderDetailProps) {
   const [sort, setSort] = useState<SortMode>("date");
   const [showMenu, setShowMenu] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(folder.title);
-  const [photos, setPhotos] = useState<Photo[]>(folder.photos);
-  const [addingPhoto, setAddingPhoto] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
+  const [showCoverPicker, setShowCoverPicker] = useState(false);
+  const [addingPhoto, setAddingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
+  const photos = folder.photos;
   const sorted = [...photos].sort((a, b) => {
     if (sort === "date") return a.date.localeCompare(b.date);
     if (sort === "place") return a.place.localeCompare(b.place);
     return a.event.localeCompare(b.event);
   });
 
-  const handleAddPhoto = () => {
-    fileInputRef.current?.click();
-  };
+  const handleAddPhoto = () => fileInputRef.current?.click();
 
   const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
     setAddingPhoto(true);
-    const newPhotos = files.map((file, i) => ({
-      id: `new-${Date.now()}-${i}`,
-      url: URL.createObjectURL(file),
-      title: file.name,
-      date: new Date().toISOString().slice(0, 10),
-      place: "Added",
-      event: "Added",
-    }));
     setTimeout(() => {
-      setPhotos((prev) => [...prev, ...newPhotos]);
       setAddingPhoto(false);
       toast.success(`${files.length} photo${files.length > 1 ? "s" : ""} added!`);
       onImportPhotos?.(files);
@@ -65,12 +57,26 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
     }
   };
 
+  const handleCoverFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    onChangeCover?.(url);
+    toast.success("Cover photo updated!");
+    setShowCoverPicker(false);
+    e.target.value = "";
+  };
+
+  const handleCoverFromPhoto = (url: string) => {
+    onChangeCover?.(url);
+    toast.success("Cover photo updated!");
+    setShowCoverPicker(false);
+  };
+
   const handleShare = async (type: "folder" | "photos") => {
     const title = type === "folder" ? `Folder: ${name}` : `${selectedPhotos.size} selected photos`;
     if (navigator.share) {
-      try {
-        await navigator.share({ title, text: `Check out ${title} on SmartMemory!`, url: window.location.href });
-      } catch { /* user cancelled */ }
+      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory!`, url: window.location.href }); } catch {}
     } else {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied!");
@@ -89,6 +95,7 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
   return (
     <div style={{ width: "100%", height: "100%" }}>
       <input ref={fileInputRef} type="file" multiple accept="image/*" style={{ display: "none" }} onChange={handleFilesSelected} />
+      <input ref={coverInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleCoverFromFile} />
 
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
@@ -108,20 +115,57 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
           <button onClick={handleAddPhoto} style={{ background: "none", border: "none", cursor: "pointer" }} disabled={addingPhoto}>
             <Plus size={14} color={addingPhoto ? "#c0c8d8" : "#8fa9dd"} />
           </button>
-          <button onClick={() => setShowMenu(!showMenu)} style={{ background: "none", border: "none", cursor: "pointer", position: "relative" }}>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ background: "none", border: "none", cursor: "pointer" }}>
             <MoreVertical size={14} color="#687287" />
           </button>
         </div>
       </div>
 
+      {/* Cover with change button */}
+      <div style={{ width: "100%", height: 70, borderRadius: 8, overflow: "hidden", marginBottom: 6, position: "relative" }}>
+        <img src={folder.image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <button onClick={() => setShowCoverPicker(true)} style={{
+          position: "absolute", bottom: 4, right: 4, backgroundColor: "rgba(0,0,0,0.5)", border: "none",
+          borderRadius: 12, padding: "2px 6px", cursor: "pointer", display: "flex", alignItems: "center", gap: 3,
+        }}>
+          <Camera size={8} color="#fff" />
+          <span style={{ fontSize: 7, color: "#fff", fontWeight: 600 }}>Change</span>
+        </button>
+      </div>
+
+      {/* Cover picker */}
+      {showCoverPicker && (
+        <div style={{ backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 8, marginBottom: 6, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+          <p style={{ fontSize: 9, fontWeight: 700, color: "#394460", marginBottom: 6 }}>Choose cover photo</p>
+          <button onClick={() => coverInputRef.current?.click()} style={{
+            width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff",
+            fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", marginBottom: 4,
+          }}>📁 From device</button>
+          {photos.length > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3, marginTop: 4 }}>
+              {photos.slice(0, 10).map((p) => (
+                <div key={p.id} onClick={() => handleCoverFromPhoto(p.url)} style={{ aspectRatio: "1", borderRadius: 4, overflow: "hidden", cursor: "pointer", border: "2px solid transparent" }}>
+                  <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              ))}
+            </div>
+          )}
+          <button onClick={() => setShowCoverPicker(false)} style={{
+            width: "100%", padding: "4px", borderRadius: 6, backgroundColor: "transparent", color: "#687287",
+            fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer", marginTop: 4,
+          }}>Cancel</button>
+        </div>
+      )}
+
       {/* Context menu */}
       {showMenu && (
         <div style={{
           position: "absolute", right: 10, top: 30, backgroundColor: "#fff", border: "1px solid #dde3f0",
-          borderRadius: 8, padding: "4px 0", zIndex: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", minWidth: 130,
+          borderRadius: 8, padding: "4px 0", zIndex: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", minWidth: 130,
         }}>
           {[
             { label: "Rename", icon: Edit3, action: () => { setRenaming(true); setShowMenu(false); } },
+            { label: "Change Cover", icon: Camera, action: () => { setShowCoverPicker(true); setShowMenu(false); } },
             { label: "Select Photos", icon: ImageIcon, action: () => { setSelectMode(!selectMode); setSelectedPhotos(new Set()); setShowMenu(false); } },
             { label: "Share Folder", icon: Share2, action: () => { setShowShareSheet(true); setShowMenu(false); } },
             { label: "Customize", icon: Palette, action: () => setShowMenu(false) },
@@ -153,7 +197,7 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
         <div className="flex items-center justify-between" style={{ marginBottom: 6, padding: "4px 6px", backgroundColor: "#eef2fb", borderRadius: 6 }}>
           <span style={{ fontSize: 9, color: "#394460", fontWeight: 600 }}>{selectedPhotos.size} selected</span>
           <div className="flex" style={{ gap: 4 }}>
-            <button onClick={() => { if (selectedPhotos.size > 0) { setShowShareSheet(true); } else { toast.error("Select photos first"); } }}
+            <button onClick={() => { if (selectedPhotos.size > 0) setShowShareSheet(true); else toast.error("Select photos first"); }}
               style={{ padding: "3px 8px", borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>
               Share Selected
             </button>
