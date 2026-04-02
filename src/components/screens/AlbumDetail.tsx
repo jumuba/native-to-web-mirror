@@ -271,6 +271,20 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
+      case "money":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>💰</p>
+            <p style={{ fontSize: 9, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
+      case "voucher":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#fefce8", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #fde047", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>🎟️</p>
+            <p style={{ fontSize: 9, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
       default:
         return null;
     }
