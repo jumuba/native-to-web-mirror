@@ -613,39 +613,46 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* ── Album Page View ── */}
+      {/* ── Album Page View (Scrapbook) ── */}
       <div style={{
-        backgroundColor: "#faf8f5", borderRadius: 8, border: "1px solid #e8e2d8",
-        minHeight: 160, position: "relative", padding: "8px 10px",
-        boxShadow: "inset 0 1px 4px rgba(0,0,0,0.06), 2px 2px 8px rgba(0,0,0,0.08)",
+        backgroundColor: "#faf8f5", borderRadius: 10, border: "2px solid #e8e2d8",
+        minHeight: 200, position: "relative", padding: "12px 14px",
+        boxShadow: "inset 0 2px 6px rgba(0,0,0,0.06), 3px 3px 12px rgba(0,0,0,0.1)",
+        backgroundImage: "linear-gradient(90deg, transparent 49.5%, rgba(0,0,0,0.04) 49.5%, rgba(0,0,0,0.04) 50.5%, transparent 50.5%)",
       }}>
-        {/* Page spine effect */}
-        <div style={{ position: "absolute", left: "50%", top: 4, bottom: 4, width: 1, backgroundColor: "rgba(0,0,0,0.06)" }} />
+        {/* Page corner fold effect */}
+        <div style={{
+          position: "absolute", top: 0, right: 0, width: 16, height: 16,
+          background: "linear-gradient(135deg, #faf8f5 50%, #e8e2d8 50%)",
+          borderRadius: "0 10px 0 0",
+        }} />
 
         {totalPages === 0 || (currentPageItems.length === 0 && photos.length === 0) ? (
-          <div className="flex flex-col items-center justify-center" style={{ minHeight: 140 }}>
-            <ImageIcon size={20} color="#c0c8d8" style={{ marginBottom: 4 }} />
-            <span style={{ fontSize: 9, color: "#8fa9dd", fontWeight: 600 }}>Empty album</span>
-            <span style={{ fontSize: 7, color: "#a0a8b8" }}>Add photos, notes, GIFs using the toolbar above</span>
+          <div className="flex flex-col items-center justify-center" style={{ minHeight: 170 }}>
+            <ImageIcon size={24} color="#c0c8d8" style={{ marginBottom: 6 }} />
+            <span style={{ fontSize: 10, color: "#8fa9dd", fontWeight: 600 }}>Empty album</span>
+            <span style={{ fontSize: 8, color: "#a0a8b8" }}>Add photos, notes, GIFs using the toolbar above</span>
           </div>
         ) : (
-          <div>
-            {currentPageItems.map((item) => renderPageItem(item))}
+          <div style={{ minHeight: 170 }}>
+            {currentPageItems.map((item) => renderPageItem(item, currentPageItems.length === 1))}
           </div>
         )}
 
         {/* Page navigation */}
-        <div className="flex items-center justify-between" style={{ marginTop: 6 }}>
+        <div className="flex items-center justify-between" style={{ marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <button onClick={goPrev} disabled={currentPage === 0} style={{
             background: "none", border: "none", cursor: currentPage === 0 ? "default" : "pointer", opacity: currentPage === 0 ? 0.3 : 1,
+            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage === 0 ? "transparent" : "#e8ecf4",
           }}>
-            <ChevronLeft size={14} color="#687287" />
+            <ChevronLeft size={16} color="#687287" />
           </button>
-          <span style={{ fontSize: 7, color: "#a0a8b8" }}>Page {currentPage + 1} / {Math.max(1, totalPages)}</span>
+          <span style={{ fontSize: 8, color: "#a0a8b8", fontWeight: 600 }}>Page {currentPage + 1} / {Math.max(1, totalPages)}</span>
           <button onClick={goNext} disabled={currentPage >= totalPages - 1} style={{
             background: "none", border: "none", cursor: currentPage >= totalPages - 1 ? "default" : "pointer", opacity: currentPage >= totalPages - 1 ? 0.3 : 1,
+            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage >= totalPages - 1 ? "transparent" : "#e8ecf4",
           }}>
-            <ChevronRight size={14} color="#687287" />
+            <ChevronRight size={16} color="#687287" />
           </button>
         </div>
       </div>
