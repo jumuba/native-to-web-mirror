@@ -20,7 +20,7 @@ interface AlbumDetailProps {
 }
 
 type PageItem = {
-  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting";
+  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting" | "money" | "voucher";
   content: string;
   id: string;
 };
