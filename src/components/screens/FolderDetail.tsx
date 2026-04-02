@@ -80,7 +80,7 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
   const handleShare = async (type: "folder" | "photos") => {
     const title = type === "folder" ? `Folder: ${name}` : `${selectedPhotos.size} selected photos`;
     if (navigator.share) {
-      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory!`, url: window.location.href }); } catch {}
+      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory App!`, url: window.location.href }); } catch {}
     } else {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied!");

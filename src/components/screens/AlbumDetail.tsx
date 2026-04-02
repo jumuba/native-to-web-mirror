@@ -196,7 +196,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const handleShare = async (type: "album" | "folder" | "photos") => {
     const shareTitle = type === "album" ? `Album: ${title}` : "Selected photos";
     if (navigator.share) {
-      try { await navigator.share({ title: shareTitle, text: `Check out ${shareTitle} on SmartMemory!`, url: window.location.href }); } catch {}
+      try { await navigator.share({ title: shareTitle, text: `Check out ${shareTitle} on SmartMemory App!`, url: window.location.href }); } catch {}
     } else {
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied!");
