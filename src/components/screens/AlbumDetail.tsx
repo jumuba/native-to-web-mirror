@@ -254,69 +254,99 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     setShowShareSheet(false);
   };
 
-  const renderPageItem = (item: PageItem) => {
+  const renderPageItem = (item: PageItem, isFullPage: boolean = false) => {
+    const photoHeight = isFullPage ? 130 : 100;
     switch (item.type) {
       case "photo":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", marginBottom: 6 }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.15)", marginBottom: 8, border: "3px solid #fff", transform: "rotate(-0.5deg)" }}>
+            <img src={item.content} alt="" style={{ width: "100%", height: photoHeight, objectFit: "cover", display: "block" }} />
           </div>
         );
       case "note":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fffbe6", borderRadius: 6, padding: "6px 8px", marginBottom: 6, border: "1px solid #f0e6b8", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-            <p style={{ fontSize: 9, color: "#5a4e1a", margin: 0, fontStyle: "italic" }}>📝 {item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#fffdf0", borderRadius: 10, padding: "14px 16px", marginBottom: 8,
+            border: "1px solid #f0e6b8", boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            backgroundImage: "repeating-linear-gradient(transparent, transparent 18px, #e8dfc0 18px, #e8dfc0 19px)",
+            minHeight: isFullPage ? 140 : undefined,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <p style={{ fontSize: 12, color: "#5a4e1a", margin: 0, fontStyle: "italic", textAlign: "center", lineHeight: 1.6, fontWeight: 600, whiteSpace: "pre-line" }}>
+              📝 {item.content}
+            </p>
           </div>
         );
       case "emoji":
         return (
-          <div key={item.id} className="flex items-center justify-center" style={{ marginBottom: 6 }}>
-            <span style={{ fontSize: 32 }}>{item.content}</span>
+          <div key={item.id} className="flex items-center justify-center" style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 36 }}>{item.content}</span>
           </div>
         );
       case "gif":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6 }}>
-            <img src={item.content} alt="GIF" style={{ width: "100%", height: 80, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", marginBottom: 8, textAlign: "center" }}>
+            {item.label && <p style={{ fontSize: 11, fontWeight: 700, color: "#9d174d", margin: "0 0 6px", textAlign: "center" }}>{item.label}</p>}
+            <img src={item.content} alt="GIF" style={{ width: "100%", height: isFullPage ? 160 : 90, objectFit: "cover", display: "block", borderRadius: 8, border: "3px solid #f9a8d4" }} />
           </div>
         );
       case "voice":
         return (
-          <div key={item.id} style={{ backgroundColor: "#eef2fb", borderRadius: 6, padding: "6px 8px", marginBottom: 6 }}>
-            <p style={{ fontSize: 9, color: "#394460", margin: 0 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#eef2fb", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
+            <p style={{ fontSize: 10, color: "#394460", margin: 0 }}>{item.content}</p>
           </div>
         );
       case "music":
         return (
-          <div key={item.id} style={{ backgroundColor: "#f0eeff", borderRadius: 6, padding: "6px 8px", marginBottom: 6, border: "1px solid #d8d0f8" }}>
-            <p style={{ fontSize: 9, color: "#5b4fa0", margin: 0 }}>🎵 {item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#f0eeff", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
+            border: "2px solid #d8d0f8", textAlign: "center", cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+          }}>
+            <p style={{ fontSize: 22, margin: "0 0 4px" }}>🎵</p>
+            <p style={{ fontSize: 10, color: "#5b4fa0", margin: 0, fontWeight: 700 }}>{item.label || item.content}</p>
+            <p style={{ fontSize: 8, color: "#8b7fd0", margin: "3px 0 0" }}>Tap to play</p>
           </div>
         );
       case "video":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 6, overflow: "hidden", marginBottom: 6, boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
-            <video src={item.content} controls style={{ width: "100%", height: 110, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{
+            width: "100%", borderRadius: 10, overflow: "hidden", marginBottom: 8,
+            boxShadow: "0 3px 12px rgba(0,0,0,0.15)", textAlign: "center",
+            backgroundColor: "#1a1a2e", position: "relative",
+          }}>
+            {item.label && (
+              <p style={{ fontSize: 10, fontWeight: 700, color: "#fff", padding: "8px 8px 4px", margin: 0, backgroundColor: "rgba(0,0,0,0.6)" }}>
+                {item.label}
+              </p>
+            )}
+            <video src={item.content} controls poster="" style={{ width: "100%", height: isFullPage ? 140 : 100, objectFit: "cover", display: "block" }} />
           </div>
         );
       case "greeting":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>💌</p>
-            <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 18, margin: 0 }}>💌</p>
+            <p style={{ fontSize: 10, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       case "money":
         return (
-          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>💰</p>
-            <p style={{ fontSize: 9, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 18, margin: 0 }}>💰</p>
+            <p style={{ fontSize: 10, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       case "voucher":
         return (
-          <div key={item.id} style={{ backgroundColor: "#fefce8", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #fde047", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 14, margin: 0 }}>🎟️</p>
-            <p style={{ fontSize: 9, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          <div key={item.id} style={{
+            backgroundColor: "#fefce8", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
+            border: "2px dashed #fbbf24", textAlign: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            backgroundImage: "radial-gradient(circle at 0% 50%, transparent 8px, #fefce8 8px), radial-gradient(circle at 100% 50%, transparent 8px, #fefce8 8px)",
+          }}>
+            <p style={{ fontSize: 18, margin: 0 }}>🎟️</p>
+            <p style={{ fontSize: 10, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
       default:
