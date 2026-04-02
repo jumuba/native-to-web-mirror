@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   ChevronLeft, ChevronRight, Share2, Download, Music, MessageSquare,
   Smile, Mic, Heart, ImageIcon, Plus, Users, Lock,
-  Edit3, Trash2, MoreVertical, MicOff, Camera,
+  Edit3, Trash2, MoreVertical, MicOff, Camera, Video, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Album, Note } from "@/lib/mockData";
