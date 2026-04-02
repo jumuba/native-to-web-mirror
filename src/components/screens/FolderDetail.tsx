@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { ChevronLeft, ArrowUpDown, Plus, Trash2, Edit3, Lock, Share2, Palette, MoreVertical, ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 import type { Folder, Photo } from "@/lib/mockData";
 
 interface FolderDetailProps {
   folder: Folder;
   onBack: () => void;
+  onDelete?: () => void;
+  onRename?: (newName: string) => void;
+  onImportPhotos?: (files: File[]) => void;
 }
 
 type SortMode = "date" | "place" | "event";
 
-export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
+export default function FolderDetail({ folder, onBack, onDelete, onRename, onImportPhotos }: FolderDetailProps) {
   const [sort, setSort] = useState<SortMode>("date");
   const [showMenu, setShowMenu] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
@@ -17,6 +21,10 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
   const [name, setName] = useState(folder.title);
   const [photos, setPhotos] = useState<Photo[]>(folder.photos);
   const [addingPhoto, setAddingPhoto] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sorted = [...photos].sort((a, b) => {
     if (sort === "date") return a.date.localeCompare(b.date);
@@ -25,25 +33,63 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
   });
 
   const handleAddPhoto = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
     setAddingPhoto(true);
+    const newPhotos = files.map((file, i) => ({
+      id: `new-${Date.now()}-${i}`,
+      url: URL.createObjectURL(file),
+      title: file.name,
+      date: new Date().toISOString().slice(0, 10),
+      place: "Added",
+      event: "Added",
+    }));
     setTimeout(() => {
-      setPhotos([
-        ...photos,
-        {
-          id: `new-${Date.now()}`,
-          url: `https://picsum.photos/seed/${Date.now()}/300/300`,
-          title: "New Photo",
-          date: "2026-04-01",
-          place: "London",
-          event: "Added",
-        },
-      ]);
+      setPhotos((prev) => [...prev, ...newPhotos]);
       setAddingPhoto(false);
+      toast.success(`${files.length} photo${files.length > 1 ? "s" : ""} added!`);
+      onImportPhotos?.(files);
     }, 800);
+    e.target.value = "";
+  };
+
+  const handleRenameConfirm = () => {
+    setRenaming(false);
+    if (name.trim() && name !== folder.title) {
+      onRename?.(name.trim());
+      toast.success(`Renamed to "${name.trim()}"`);
+    }
+  };
+
+  const handleShare = async (type: "folder" | "photos") => {
+    const title = type === "folder" ? `Folder: ${name}` : `${selectedPhotos.size} selected photos`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: `Check out ${title} on SmartMemory!`, url: window.location.href });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied!");
+    }
+    setShowShareSheet(false);
+  };
+
+  const toggleSelectPhoto = (id: string) => {
+    setSelectedPhotos((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
+      <input ref={fileInputRef} type="file" multiple accept="image/*" style={{ display: "none" }} onChange={handleFilesSelected} />
+
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
         <div className="flex items-center">
@@ -51,14 +97,9 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
             <ChevronLeft size={14} color="#394460" />
           </button>
           {renaming ? (
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => setRenaming(false)}
-              onKeyDown={(e) => e.key === "Enter" && setRenaming(false)}
-              autoFocus
-              style={{ fontSize: 12, fontWeight: 700, color: "#394460", border: "1px solid #8fa9dd", borderRadius: 4, padding: "2px 4px", outline: "none", width: 100 }}
-            />
+            <input value={name} onChange={(e) => setName(e.target.value)} onBlur={handleRenameConfirm}
+              onKeyDown={(e) => e.key === "Enter" && handleRenameConfirm()} autoFocus
+              style={{ fontSize: 12, fontWeight: 700, color: "#394460", border: "1px solid #8fa9dd", borderRadius: 4, padding: "2px 4px", outline: "none", width: 100 }} />
           ) : (
             <span style={{ fontSize: 12, fontWeight: 700, color: "#394460", marginLeft: 4 }}>{name}</span>
           )}
@@ -75,33 +116,20 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
 
       {/* Context menu */}
       {showMenu && (
-        <div
-          style={{
-            position: "absolute",
-            right: 10,
-            top: 30,
-            backgroundColor: "#fff",
-            border: "1px solid #dde3f0",
-            borderRadius: 8,
-            padding: "4px 0",
-            zIndex: 10,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            minWidth: 120,
-          }}
-        >
+        <div style={{
+          position: "absolute", right: 10, top: 30, backgroundColor: "#fff", border: "1px solid #dde3f0",
+          borderRadius: 8, padding: "4px 0", zIndex: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", minWidth: 130,
+        }}>
           {[
             { label: "Rename", icon: Edit3, action: () => { setRenaming(true); setShowMenu(false); } },
+            { label: "Select Photos", icon: ImageIcon, action: () => { setSelectMode(!selectMode); setSelectedPhotos(new Set()); setShowMenu(false); } },
+            { label: "Share Folder", icon: Share2, action: () => { setShowShareSheet(true); setShowMenu(false); } },
             { label: "Customize", icon: Palette, action: () => setShowMenu(false) },
             { label: "Password Lock", icon: Lock, action: () => setShowMenu(false) },
-            { label: "Share", icon: Share2, action: () => setShowMenu(false) },
             { label: "Delete", icon: Trash2, action: () => { setShowDelete(true); setShowMenu(false); }, color: "#ef4444" },
           ].map((item) => (
-            <button
-              key={item.label}
-              onClick={item.action}
-              className="flex items-center"
-              style={{ width: "100%", padding: "6px 10px", background: "none", border: "none", cursor: "pointer", gap: 6 }}
-            >
+            <button key={item.label} onClick={item.action} className="flex items-center"
+              style={{ width: "100%", padding: "6px 10px", background: "none", border: "none", cursor: "pointer", gap: 6 }}>
               <item.icon size={10} color={item.color || "#687287"} />
               <span style={{ fontSize: 9, color: item.color || "#394460", fontWeight: 600 }}>{item.label}</span>
             </button>
@@ -114,10 +142,23 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
         <div style={{ backgroundColor: "#fff3f3", border: "1px solid #fecaca", borderRadius: 8, padding: 10, marginBottom: 8 }}>
           <p style={{ fontSize: 10, color: "#ef4444", fontWeight: 600, marginBottom: 6 }}>Delete "{name}"?</p>
           <div className="flex" style={{ gap: 6 }}>
-            <button onClick={() => { setShowDelete(false); onBack(); }} style={{ flex: 1, padding: "4px", borderRadius: 4, backgroundColor: "#ef4444", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>
-              Delete
+            <button onClick={() => { onDelete?.(); toast.success("Folder deleted"); }} style={{ flex: 1, padding: "4px", borderRadius: 4, backgroundColor: "#ef4444", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Delete</button>
+            <button onClick={() => setShowDelete(false)} style={{ flex: 1, padding: "4px", borderRadius: 4, backgroundColor: "#e8ecf4", color: "#687287", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Select mode bar */}
+      {selectMode && (
+        <div className="flex items-center justify-between" style={{ marginBottom: 6, padding: "4px 6px", backgroundColor: "#eef2fb", borderRadius: 6 }}>
+          <span style={{ fontSize: 9, color: "#394460", fontWeight: 600 }}>{selectedPhotos.size} selected</span>
+          <div className="flex" style={{ gap: 4 }}>
+            <button onClick={() => { if (selectedPhotos.size > 0) { setShowShareSheet(true); } else { toast.error("Select photos first"); } }}
+              style={{ padding: "3px 8px", borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>
+              Share Selected
             </button>
-            <button onClick={() => setShowDelete(false)} style={{ flex: 1, padding: "4px", borderRadius: 4, backgroundColor: "#e8ecf4", color: "#687287", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>
+            <button onClick={() => { setSelectMode(false); setSelectedPhotos(new Set()); }}
+              style={{ padding: "3px 8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#687287", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>
               Cancel
             </button>
           </div>
@@ -128,23 +169,10 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
       <div className="flex items-center" style={{ gap: 4, marginBottom: 8 }}>
         <ArrowUpDown size={10} color="#687287" />
         {(["date", "place", "event"] as SortMode[]).map((s) => (
-          <button
-            key={s}
-            onClick={() => setSort(s)}
-            style={{
-              padding: "2px 8px",
-              borderRadius: 10,
-              fontSize: 8,
-              fontWeight: 600,
-              border: "none",
-              cursor: "pointer",
-              backgroundColor: sort === s ? "#8fa9dd" : "#e8ecf4",
-              color: sort === s ? "#fff" : "#687287",
-              textTransform: "capitalize",
-            }}
-          >
-            {s}
-          </button>
+          <button key={s} onClick={() => setSort(s)} style={{
+            padding: "2px 8px", borderRadius: 10, fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer",
+            backgroundColor: sort === s ? "#8fa9dd" : "#e8ecf4", color: sort === s ? "#fff" : "#687287", textTransform: "capitalize",
+          }}>{s}</button>
         ))}
         <span style={{ fontSize: 8, color: "#a0a8b8", marginLeft: "auto" }}>{photos.length} photos</span>
       </div>
@@ -158,9 +186,19 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 3 }}>
-          {sorted.slice(0, 18).map((photo) => (
-            <div key={photo.id} style={{ aspectRatio: "1", borderRadius: 4, overflow: "hidden" }}>
+          {sorted.slice(0, 30).map((photo) => (
+            <div key={photo.id} style={{ aspectRatio: "1", borderRadius: 4, overflow: "hidden", position: "relative", cursor: selectMode ? "pointer" : "default" }}
+              onClick={() => selectMode && toggleSelectPhoto(photo.id)}>
               <img src={photo.url} alt={photo.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {selectMode && (
+                <div style={{
+                  position: "absolute", top: 2, right: 2, width: 16, height: 16, borderRadius: 8,
+                  backgroundColor: selectedPhotos.has(photo.id) ? "#8fa9dd" : "rgba(255,255,255,0.7)",
+                  border: "1.5px solid #fff", display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {selectedPhotos.has(photo.id) && <span style={{ color: "#fff", fontSize: 10, fontWeight: 700 }}>✓</span>}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -169,7 +207,33 @@ export default function FolderDetail({ folder, onBack }: FolderDetailProps) {
       {addingPhoto && (
         <div className="flex items-center justify-center" style={{ padding: "8px 0" }}>
           <div className="animate-spin" style={{ width: 16, height: 16, border: "2px solid #8fa9dd", borderTop: "2px solid transparent", borderRadius: "50%" }} />
-          <span style={{ fontSize: 9, color: "#8fa9dd", marginLeft: 6 }}>Adding photo...</span>
+          <span style={{ fontSize: 9, color: "#8fa9dd", marginLeft: 6 }}>Adding photos...</span>
+        </div>
+      )}
+
+      {/* Share sheet */}
+      {showShareSheet && (
+        <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 10, borderRadius: 38, overflow: "hidden" }}>
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => setShowShareSheet(false)} />
+          <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "12px 12px 0 0", padding: "12px 14px 20px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#394460", marginBottom: 8 }}>Share</p>
+            <div className="flex flex-col" style={{ gap: 6 }}>
+              <button onClick={() => handleShare("folder")}
+                style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
+                📁 Share Folder "{name}"
+              </button>
+              {selectedPhotos.size > 0 && (
+                <button onClick={() => handleShare("photos")}
+                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
+                  🖼️ Share {selectedPhotos.size} Selected Photo{selectedPhotos.size > 1 ? "s" : ""}
+                </button>
+              )}
+              <button onClick={() => setShowShareSheet(false)}
+                style={{ width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "transparent", color: "#687287", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

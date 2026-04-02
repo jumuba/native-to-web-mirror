@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FolderPlus, BookOpen, ImagePlus, Video, Smartphone,
   Cloud, Monitor, Link, Music, X, CheckCircle, AlertCircle,
-  Loader2, ChevronRight, Lock, Globe, Eye, EyeOff,
+  Loader2, Lock, Globe, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { mockFolders, mockAlbums } from "@/lib/mockData";
@@ -36,6 +36,9 @@ interface CreateImportSheetProps {
 export default function CreateImportSheet({ open, onClose, onCreateFolder, onCreateAlbum }: CreateImportSheetProps) {
   const [flow, setFlow] = useState<FlowState>("idle");
   const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importedFiles, setImportedFiles] = useState<File[]>([]);
+  const [currentImportType, setCurrentImportType] = useState("");
 
   // Create Folder state
   const [folderName, setFolderName] = useState("");
@@ -63,22 +66,11 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
 
   useEffect(() => {
     if (!open) {
-      setFlow("idle");
-      setProgress(0);
-      setFolderName("");
-      setFolderColor(folderColors[0]);
-      setFolderFont("Default");
-      setFolderPassword(false);
-      setFolderPrivate(false);
-      setAlbumTitle("");
-      setAlbumCategory("Birthday");
-      setAlbumTheme("classic");
-      setAlbumPrivate(false);
-      setLinkUrl("");
-      setLinkType("YouTube");
-      setMusicSource("YouTube");
-      setMusicInput("");
-      setSaveTarget(null);
+      setFlow("idle"); setProgress(0); setFolderName(""); setFolderColor(folderColors[0]);
+      setFolderFont("Default"); setFolderPassword(false); setFolderPrivate(false);
+      setAlbumTitle(""); setAlbumCategory("Birthday"); setAlbumTheme("classic"); setAlbumPrivate(false);
+      setLinkUrl(""); setLinkType("YouTube"); setMusicSource("YouTube"); setMusicInput("");
+      setSaveTarget(null); setImportedFiles([]); setCurrentImportType("");
     }
   }, [open]);
 
@@ -88,18 +80,38 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
     if (id === "add-link") { setFlow("add-link"); return; }
     if (id === "add-music") { setFlow("add-music"); return; }
 
-    // Import actions → simulate upload
+    // For import actions, open real file picker for photos/videos/pc
+    setCurrentImportType(id);
+    if (["import-photos", "import-videos", "import-pc"].includes(id)) {
+      const accept = id === "import-videos" ? "video/*" : "image/*";
+      if (fileInputRef.current) {
+        fileInputRef.current.accept = accept;
+        fileInputRef.current.click();
+      }
+      return;
+    }
+
+    // For phone/iCloud — simulate
+    simulateUpload();
+  };
+
+  const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setImportedFiles(files);
+    simulateUpload();
+    // Reset input so the same file can be selected again
+    e.target.value = "";
+  };
+
+  const simulateUpload = () => {
     setFlow("uploading");
     setProgress(0);
     const interval = setInterval(() => {
       setProgress((p) => {
         if (p >= 100) {
           clearInterval(interval);
-          if (Math.random() > 0.15) {
-            setFlow("save-to");
-          } else {
-            setFlow("error");
-          }
+          setFlow("save-to");
           return 100;
         }
         return p + Math.random() * 15 + 5;
@@ -110,14 +122,14 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
   const handleCreateFolder = () => {
     if (!folderName.trim()) { toast.error("Please enter a folder name"); return; }
     onCreateFolder?.({ name: folderName.trim(), color: folderColor, font: folderFont, hasPassword: folderPassword, isPrivate: folderPrivate });
-    toast.success("Folder created");
+    toast.success(`Folder "${folderName.trim()}" created!`);
     onClose();
   };
 
   const handleCreateAlbum = () => {
     if (!albumTitle.trim()) { toast.error("Please enter an album title"); return; }
     onCreateAlbum?.({ title: albumTitle.trim(), category: albumCategory, theme: albumTheme, isPrivate: albumPrivate });
-    toast.success("Album created");
+    toast.success(`Album "${albumTitle.trim()}" created!`);
     onClose();
   };
 
@@ -135,7 +147,8 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
 
   const handleSaveTo = () => {
     if (!saveTarget) { toast.error("Please select a destination"); return; }
-    toast.success("Upload complete");
+    const count = importedFiles.length || 1;
+    toast.success(`${count} file${count > 1 ? "s" : ""} imported successfully!`);
     onClose();
   };
 
@@ -143,12 +156,9 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
 
   const inputStyle: React.CSSProperties = {
     width: "100%", height: 32, borderRadius: 6, border: "1px solid #d0d5dd",
-    padding: "0 8px", fontSize: 11, color: "#394460", outline: "none",
-    backgroundColor: "#f9fafb",
+    padding: "0 8px", fontSize: 11, color: "#394460", outline: "none", backgroundColor: "#f9fafb",
   };
-
   const labelStyle: React.CSSProperties = { fontSize: 10, fontWeight: 600, color: "#5b6585", marginBottom: 3, display: "block" };
-
   const submitBtnStyle: React.CSSProperties = {
     width: "100%", height: 34, borderRadius: 8, backgroundColor: "#8fa9dd",
     color: "#fff", fontSize: 12, fontWeight: 700, border: "none", cursor: "pointer",
@@ -161,18 +171,13 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
         {icon}
         <span style={{ fontSize: 10, color: "#5b6585", fontWeight: 600 }}>{label}</span>
       </div>
-      <button
-        onClick={() => onChange(!value)}
-        style={{
-          width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
-          backgroundColor: value ? "#8fa9dd" : "#d0d5dd", position: "relative",
-          transition: "background-color 0.2s",
-        }}
-      >
+      <button onClick={() => onChange(!value)} style={{
+        width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
+        backgroundColor: value ? "#8fa9dd" : "#d0d5dd", position: "relative", transition: "background-color 0.2s",
+      }}>
         <div style={{
           width: 16, height: 16, borderRadius: 8, backgroundColor: "#fff",
-          position: "absolute", top: 2,
-          left: value ? 18 : 2, transition: "left 0.2s",
+          position: "absolute", top: 2, left: value ? 18 : 2, transition: "left 0.2s",
           boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
         }} />
       </button>
@@ -183,10 +188,12 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
     <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 70, borderRadius: 38, overflow: "hidden" }}>
       <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.5)" }} onClick={flow === "idle" ? onClose : undefined} />
 
+      {/* Hidden file input */}
+      <input ref={fileInputRef} type="file" multiple style={{ display: "none" }} onChange={handleFilesSelected} />
+
       <div style={{
         position: "relative", backgroundColor: "#ffffff", borderRadius: "16px 16px 0 0",
-        padding: "12px 14px 20px",
-        animation: "albumZoomIn 0.3s ease-out",
+        padding: "12px 14px 20px", animation: "albumZoomIn 0.3s ease-out",
       }}>
         {/* Handle */}
         <div className="flex justify-center" style={{ marginBottom: 8 }}>
@@ -208,9 +215,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
           </span>
           <div className="flex items-center" style={{ gap: 6 }}>
             {flow !== "idle" && flow !== "uploading" && (
-              <button onClick={() => setFlow("idle")} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 10, color: "#8fa9dd", fontWeight: 600 }}>
-                Back
-              </button>
+              <button onClick={() => setFlow("idle")} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, fontSize: 10, color: "#8fa9dd", fontWeight: 600 }}>Back</button>
             )}
             <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
               <X size={16} color="#687287" />
@@ -222,19 +227,13 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
         {flow === "idle" && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
             {options.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => handleAction(opt.id)}
+              <button key={opt.id} onClick={() => handleAction(opt.id)}
                 className="flex flex-col items-center transition-all duration-150 hover:scale-105 active:scale-95"
-                style={{ background: "none", border: "1px solid #e8ecf4", borderRadius: 10, padding: "10px 4px", cursor: "pointer" }}
-              >
-                <div className="flex items-center justify-center"
-                  style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: `${opt.color}22`, marginBottom: 4 }}>
+                style={{ background: "none", border: "1px solid #e8ecf4", borderRadius: 10, padding: "10px 4px", cursor: "pointer" }}>
+                <div className="flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: `${opt.color}22`, marginBottom: 4 }}>
                   <opt.icon size={16} color={opt.color} />
                 </div>
-                <span style={{ fontSize: 8, color: "#5b6585", fontWeight: 600, textAlign: "center", lineHeight: "10px" }}>
-                  {opt.label}
-                </span>
+                <span style={{ fontSize: 8, color: "#5b6585", fontWeight: 600, textAlign: "center", lineHeight: "10px" }}>{opt.label}</span>
               </button>
             ))}
           </div>
@@ -252,7 +251,8 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
               <div className="flex" style={{ gap: 6 }}>
                 {folderColors.map((c) => (
                   <button key={c} onClick={() => setFolderColor(c)} style={{
-                    width: 24, height: 24, borderRadius: 12, backgroundColor: c, border: folderColor === c ? "2px solid #394460" : "2px solid transparent",
+                    width: 24, height: 24, borderRadius: 12, backgroundColor: c,
+                    border: folderColor === c ? "2px solid #394460" : "2px solid transparent",
                     cursor: "pointer", transition: "border-color 0.15s",
                   }} />
                 ))}
@@ -265,8 +265,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
                   <button key={f} onClick={() => setFolderFont(f)} style={{
                     padding: "4px 8px", borderRadius: 6, fontSize: 9, fontWeight: 600, cursor: "pointer",
                     backgroundColor: folderFont === f ? "#8fa9dd" : "#f0f2f5",
-                    color: folderFont === f ? "#fff" : "#5b6585",
-                    border: "none", transition: "all 0.15s",
+                    color: folderFont === f ? "#fff" : "#5b6585", border: "none", transition: "all 0.15s",
                   }}>{f}</button>
                 ))}
               </div>
@@ -291,8 +290,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
                   <button key={c} onClick={() => setAlbumCategory(c)} style={{
                     padding: "4px 8px", borderRadius: 6, fontSize: 9, fontWeight: 600, cursor: "pointer",
                     backgroundColor: albumCategory === c ? "#8b5cf6" : "#f0f2f5",
-                    color: albumCategory === c ? "#fff" : "#5b6585",
-                    border: "none", transition: "all 0.15s",
+                    color: albumCategory === c ? "#fff" : "#5b6585", border: "none", transition: "all 0.15s",
                   }}>{c}</button>
                 ))}
               </div>
@@ -304,8 +302,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
                   <button key={t} onClick={() => setAlbumTheme(t)} style={{
                     padding: "4px 8px", borderRadius: 6, fontSize: 9, fontWeight: 600, cursor: "pointer",
                     backgroundColor: albumTheme === t ? "#8b5cf6" : "#f0f2f5",
-                    color: albumTheme === t ? "#fff" : "#5b6585",
-                    border: "none", transition: "all 0.15s", textTransform: "capitalize",
+                    color: albumTheme === t ? "#fff" : "#5b6585", border: "none", transition: "all 0.15s", textTransform: "capitalize",
                   }}>{t}</button>
                 ))}
               </div>
@@ -319,12 +316,11 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
         {flow === "uploading" && (
           <div className="flex flex-col items-center" style={{ padding: "16px 0" }}>
             <Loader2 size={28} color="#8fa9dd" className="animate-spin" style={{ marginBottom: 10 }} />
-            <span style={{ fontSize: 12, color: "#5b6585", fontWeight: 600, marginBottom: 8 }}>Importing...</span>
+            <span style={{ fontSize: 12, color: "#5b6585", fontWeight: 600, marginBottom: 8 }}>
+              {importedFiles.length > 0 ? `Importing ${importedFiles.length} file${importedFiles.length > 1 ? "s" : ""}...` : "Importing..."}
+            </span>
             <div style={{ width: "100%", height: 6, borderRadius: 3, backgroundColor: "#e8ecf4", overflow: "hidden" }}>
-              <div style={{
-                width: `${Math.min(progress, 100)}%`, height: "100%", backgroundColor: "#8fa9dd",
-                borderRadius: 3, transition: "width 0.2s",
-              }} />
+              <div style={{ width: `${Math.min(progress, 100)}%`, height: "100%", backgroundColor: "#8fa9dd", borderRadius: 3, transition: "width 0.2s" }} />
             </div>
             <span style={{ fontSize: 10, color: "#8fa9dd", marginTop: 4 }}>{Math.min(Math.round(progress), 100)}%</span>
           </div>
@@ -337,28 +333,22 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
             <div style={{ maxHeight: 180, overflowY: "auto" }}>
               <span style={{ fontSize: 9, fontWeight: 700, color: "#394460", marginBottom: 4, display: "block" }}>Folders</span>
               {mockFolders.map((f) => (
-                <button key={f.id} onClick={() => setSaveTarget(f.id)}
-                  className="flex items-center justify-between"
-                  style={{
-                    width: "100%", padding: "6px 8px", borderRadius: 6, marginBottom: 3, cursor: "pointer",
-                    backgroundColor: saveTarget === f.id ? "#8fa9dd15" : "transparent",
-                    border: saveTarget === f.id ? "1px solid #8fa9dd" : "1px solid #e8ecf4",
-                    transition: "all 0.15s",
-                  }}>
+                <button key={f.id} onClick={() => setSaveTarget(f.id)} className="flex items-center justify-between" style={{
+                  width: "100%", padding: "6px 8px", borderRadius: 6, marginBottom: 3, cursor: "pointer",
+                  backgroundColor: saveTarget === f.id ? "#8fa9dd15" : "transparent",
+                  border: saveTarget === f.id ? "1px solid #8fa9dd" : "1px solid #e8ecf4", transition: "all 0.15s",
+                }}>
                   <span style={{ fontSize: 10, color: "#394460", fontWeight: 600 }}>{f.title}</span>
                   {saveTarget === f.id && <CheckCircle size={12} color="#8fa9dd" />}
                 </button>
               ))}
               <span style={{ fontSize: 9, fontWeight: 700, color: "#394460", marginBottom: 4, marginTop: 6, display: "block" }}>Albums</span>
               {mockAlbums.map((a) => (
-                <button key={a.id} onClick={() => setSaveTarget(a.id)}
-                  className="flex items-center justify-between"
-                  style={{
-                    width: "100%", padding: "6px 8px", borderRadius: 6, marginBottom: 3, cursor: "pointer",
-                    backgroundColor: saveTarget === a.id ? "#8b5cf615" : "transparent",
-                    border: saveTarget === a.id ? "1px solid #8b5cf6" : "1px solid #e8ecf4",
-                    transition: "all 0.15s",
-                  }}>
+                <button key={a.id} onClick={() => setSaveTarget(a.id)} className="flex items-center justify-between" style={{
+                  width: "100%", padding: "6px 8px", borderRadius: 6, marginBottom: 3, cursor: "pointer",
+                  backgroundColor: saveTarget === a.id ? "#8b5cf615" : "transparent",
+                  border: saveTarget === a.id ? "1px solid #8b5cf6" : "1px solid #e8ecf4", transition: "all 0.15s",
+                }}>
                   <span style={{ fontSize: 10, color: "#394460", fontWeight: 600 }}>{a.title}</span>
                   {saveTarget === a.id && <CheckCircle size={12} color="#8b5cf6" />}
                 </button>
@@ -374,10 +364,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
             <AlertCircle size={32} color="#ef4444" style={{ marginBottom: 8 }} />
             <span style={{ fontSize: 13, color: "#ef4444", fontWeight: 700 }}>Import Failed</span>
             <span style={{ fontSize: 10, color: "#687287", marginTop: 4 }}>Network error. Please try again.</span>
-            <button onClick={() => { setFlow("idle"); setProgress(0); }}
-              style={{ ...submitBtnStyle, backgroundColor: "#ef4444" }} className="active:opacity-80">
-              Retry
-            </button>
+            <button onClick={() => { setFlow("idle"); setProgress(0); }} style={{ ...submitBtnStyle, backgroundColor: "#ef4444" }} className="active:opacity-80">Retry</button>
           </div>
         )}
 
@@ -395,8 +382,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
                   <button key={t} onClick={() => setLinkType(t)} style={{
                     padding: "4px 10px", borderRadius: 6, fontSize: 9, fontWeight: 600, cursor: "pointer",
                     backgroundColor: linkType === t ? "#c9a9d2" : "#f0f2f5",
-                    color: linkType === t ? "#fff" : "#5b6585",
-                    border: "none", transition: "all 0.15s",
+                    color: linkType === t ? "#fff" : "#5b6585", border: "none", transition: "all 0.15s",
                   }}>{t}</button>
                 ))}
               </div>
@@ -415,8 +401,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
                   <button key={s} onClick={() => setMusicSource(s)} style={{
                     padding: "4px 10px", borderRadius: 6, fontSize: 9, fontWeight: 600, cursor: "pointer",
                     backgroundColor: musicSource === s ? "#d2a9b8" : "#f0f2f5",
-                    color: musicSource === s ? "#fff" : "#5b6585",
-                    border: "none", transition: "all 0.15s",
+                    color: musicSource === s ? "#fff" : "#5b6585", border: "none", transition: "all 0.15s",
                   }}>{s}</button>
                 ))}
               </div>
