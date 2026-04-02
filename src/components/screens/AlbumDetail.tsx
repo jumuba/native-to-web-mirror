@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Album, Note } from "@/lib/mockData";
+import { useAppState } from "@/lib/AppStateContext";
 
 interface AlbumDetailProps {
   album: Album;

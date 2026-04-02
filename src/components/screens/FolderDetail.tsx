@@ -137,24 +137,97 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
         </button>
       </div>
 
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: "none" }} onChange={handleCoverFromFile} />
+
       {/* Cover picker */}
       {showCoverPicker && (
-        <div style={{ backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 8, marginBottom: 6, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-          <p style={{ fontSize: 9, fontWeight: 700, color: "#394460", marginBottom: 6 }}>Choose cover photo</p>
-          <button onClick={() => coverInputRef.current?.click()} style={{
-            width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff",
-            fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", marginBottom: 4,
-          }}>📁 From device</button>
-          {photos.length > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3, marginTop: 4 }}>
-              {photos.slice(0, 10).map((p) => (
-                <div key={p.id} onClick={() => handleCoverFromPhoto(p.url)} style={{ aspectRatio: "1", borderRadius: 4, overflow: "hidden", cursor: "pointer", border: "2px solid transparent" }}>
-                  <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 8, marginBottom: 6, boxShadow: "0 4px 12px rgba(0,0,0,0.1)", maxHeight: 220, overflowY: "auto" }}>
+          {coverPickerSource === "main" && (
+            <>
+              <p style={{ fontSize: 9, fontWeight: 700, color: "#394460", marginBottom: 6 }}>Choose cover photo</p>
+              <div className="flex flex-col" style={{ gap: 3 }}>
+                <button onClick={() => coverInputRef.current?.click()} style={{
+                  width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff",
+                  fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer",
+                }}>📁 From device</button>
+                <button onClick={() => cameraInputRef.current?.click()} style={{
+                  width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#7b9ed4", color: "#fff",
+                  fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer",
+                }}>📷 From camera roll</button>
+                <button onClick={() => setCoverPickerSource("folders")} style={{
+                  width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460",
+                  fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer",
+                }}>📂 From a folder</button>
+                <button onClick={() => setCoverPickerSource("albums")} style={{
+                  width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460",
+                  fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer",
+                }}>📒 From an album</button>
+              </div>
+              {photos.length > 0 && (
+                <>
+                  <p style={{ fontSize: 8, color: "#a0a8b8", marginTop: 6, marginBottom: 3 }}>This folder's photos</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 3 }}>
+                    {photos.slice(0, 10).map((p) => (
+                      <div key={p.id} onClick={() => handleCoverFromPhoto(p.url)} style={{ aspectRatio: "1", borderRadius: 4, overflow: "hidden", cursor: "pointer" }}>
+                        <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+          {coverPickerSource === "folders" && (
+            <>
+              <div className="flex items-center" style={{ marginBottom: 6, gap: 4 }}>
+                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                  <ChevronLeft size={12} color="#394460" />
+                </button>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "#394460", margin: 0 }}>Pick from a folder</p>
+              </div>
+              {folders.filter((f) => f.photos.length > 0).map((f) => (
+                <div key={f.id} style={{ marginBottom: 6 }}>
+                  <p style={{ fontSize: 8, fontWeight: 600, color: "#687287", marginBottom: 3 }}>📂 {f.title}</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 2 }}>
+                    {f.photos.slice(0, 5).map((p) => (
+                      <div key={p.id} onClick={() => { handleCoverFromPhoto(p.url); setCoverPickerSource("main"); }} style={{ aspectRatio: "1", borderRadius: 3, overflow: "hidden", cursor: "pointer" }}>
+                        <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
-            </div>
+              {folders.filter((f) => f.photos.length > 0).length === 0 && (
+                <p style={{ fontSize: 8, color: "#a0a8b8", textAlign: "center", padding: "10px 0" }}>No folders with photos</p>
+              )}
+            </>
           )}
-          <button onClick={() => setShowCoverPicker(false)} style={{
+          {coverPickerSource === "albums" && (
+            <>
+              <div className="flex items-center" style={{ marginBottom: 6, gap: 4 }}>
+                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}>
+                  <ChevronLeft size={12} color="#394460" />
+                </button>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "#394460", margin: 0 }}>Pick from an album</p>
+              </div>
+              {albums.filter((a) => a.photos.length > 0).map((a) => (
+                <div key={a.id} style={{ marginBottom: 6 }}>
+                  <p style={{ fontSize: 8, fontWeight: 600, color: "#687287", marginBottom: 3 }}>📒 {a.title}</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 2 }}>
+                    {a.photos.slice(0, 5).map((p) => (
+                      <div key={p.id} onClick={() => { handleCoverFromPhoto(p.url); setCoverPickerSource("main"); }} style={{ aspectRatio: "1", borderRadius: 3, overflow: "hidden", cursor: "pointer" }}>
+                        <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {albums.filter((a) => a.photos.length > 0).length === 0 && (
+                <p style={{ fontSize: 8, color: "#a0a8b8", textAlign: "center", padding: "10px 0" }}>No albums with photos</p>
+              )}
+            </>
+          )}
+          <button onClick={() => { setShowCoverPicker(false); setCoverPickerSource("main"); }} style={{
             width: "100%", padding: "4px", borderRadius: 6, backgroundColor: "transparent", color: "#687287",
             fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer", marginTop: 4,
           }}>Cancel</button>
