@@ -163,6 +163,21 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     toast.success("Music added!");
   };
 
+  const handleAddVideo = () => videoInputRef.current?.click();
+  const handleVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setExtraItems((prev) => [...prev, { type: "video", content: url, id: `video-${Date.now()}` }]);
+    toast.success("Video added!");
+    e.target.value = "";
+  };
+
+  const handleAddGreetingCard = () => {
+    setExtraItems((prev) => [...prev, { type: "greeting", content: "🎉 Happy Celebration!", id: `greeting-${Date.now()}` }]);
+    toast.success("Greeting card added!");
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
