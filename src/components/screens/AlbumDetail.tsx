@@ -19,7 +19,7 @@ interface AlbumDetailProps {
 }
 
 type PageItem = {
-  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video";
+  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting";
   content: string;
   id: string;
 };
