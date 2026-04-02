@@ -543,7 +543,13 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 20, borderRadius: 38, overflow: "hidden" }}>
           <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => setShowShareSheet(false)} />
           <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "12px 12px 0 0", padding: "10px 12px 16px" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "#394460", marginBottom: 6 }}>Share</p>
+            <div className="flex items-center" style={{ marginBottom: 6, gap: 6 }}>
+              <button onClick={() => setShowShareSheet(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
+                <ChevronLeft size={14} color="#394460" />
+              </button>
+              <p style={{ fontSize: 10, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
+              <span style={{ fontSize: 8, color: "#687287", marginLeft: "auto" }}>SmartMemory App</span>
+            </div>
             <div className="flex flex-col" style={{ gap: 4 }}>
               <button onClick={() => handleShare("album")}
                 style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
