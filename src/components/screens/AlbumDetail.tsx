@@ -3,6 +3,7 @@ import {
   ChevronLeft, ChevronRight, Share2, Download, Music, MessageSquare,
   Smile, Mic, Heart, ImageIcon, Plus, Users, Lock,
   Edit3, Trash2, MoreVertical, MicOff, Camera, Video, Mail,
+  DollarSign, Ticket,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Album, Note } from "@/lib/mockData";
@@ -19,7 +20,7 @@ interface AlbumDetailProps {
 }
 
 type PageItem = {
-  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting";
+  type: "photo" | "note" | "emoji" | "gif" | "voice" | "music" | "video" | "greeting" | "money" | "voucher";
   content: string;
   id: string;
 };
@@ -270,6 +271,20 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <p style={{ fontSize: 9, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
           </div>
         );
+      case "money":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>💰</p>
+            <p style={{ fontSize: 9, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
+      case "voucher":
+        return (
+          <div key={item.id} style={{ backgroundColor: "#fefce8", borderRadius: 8, padding: "10px 8px", marginBottom: 6, border: "2px solid #fde047", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <p style={{ fontSize: 14, margin: 0 }}>🎟️</p>
+            <p style={{ fontSize: 9, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
+          </div>
+        );
       default:
         return null;
     }
@@ -448,16 +463,17 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* ── Toolbar: Row 1 (add content) ── */}
+      {/* ── Toolbar: Row 1 (5 items) ── */}
       <div className="flex items-center justify-between" style={{ marginBottom: 3, padding: "3px 0" }}>
         {[
           { icon: <ImageIcon size={11} color="#687287" />, label: "Photo", action: handleAddPhotos },
           { icon: <MessageSquare size={11} color="#687287" />, label: "Note", action: () => setShowNoteInput(!showNoteInput) },
           { icon: <Music size={11} color="#687287" />, label: "Music", action: () => setShowMusicInput(!showMusicInput) },
           { icon: <Video size={11} color="#687287" />, label: "Video", action: handleAddVideo },
+          { icon: <span style={{ fontSize: 12 }}>🎞️</span>, label: "GIF", action: () => setShowGifPicker(!showGifPicker) },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
-            background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
+            background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1,
           }}>
             {btn.icon}
             <span style={{ fontSize: 6, color: "#687287", marginTop: 1 }}>{btn.label}</span>
@@ -465,16 +481,17 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         ))}
       </div>
 
-      {/* ── Toolbar: Row 2 (add content) ── */}
+      {/* ── Toolbar: Row 2 (5 items) ── */}
       <div className="flex items-center justify-between" style={{ marginBottom: 4, padding: "3px 0" }}>
         {[
-          { icon: <span style={{ fontSize: 12 }}>🎞️</span>, label: "GIF", action: () => setShowGifPicker(!showGifPicker) },
           { icon: <Smile size={11} color="#687287" />, label: "Emoji", action: () => setShowEmojiPicker(!showEmojiPicker) },
           { icon: isRecording ? <MicOff size={11} color="#ef4444" /> : <Mic size={11} color="#687287" />, label: isRecording ? `${recordingTime}s` : "Voice", action: isRecording ? stopRecording : startRecording },
           { icon: <Mail size={11} color="#687287" />, label: "Card", action: handleAddGreetingCard },
+          { icon: <DollarSign size={11} color="#687287" />, label: "Money", action: () => { setExtraItems((prev) => [...prev, { type: "money", content: "💰 Money Gift", id: `money-${Date.now()}` }]); toast.success("Money gift added!"); } },
+          { icon: <Ticket size={11} color="#687287" />, label: "Voucher", action: () => { setExtraItems((prev) => [...prev, { type: "voucher", content: "🎟️ Gift Voucher", id: `voucher-${Date.now()}` }]); toast.success("Voucher added!"); } },
         ].map((btn) => (
           <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
-            background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 4, flex: 1,
+            background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1,
           }}>
             {btn.icon}
             <span style={{ fontSize: 6, color: isRecording && btn.label.includes("s") ? "#ef4444" : "#687287", marginTop: 1 }}>{btn.label}</span>
