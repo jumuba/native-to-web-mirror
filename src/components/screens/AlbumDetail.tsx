@@ -109,7 +109,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const recordingIntervalRef = useRef<number | null>(null);
 
   const photos = album.photos;
-  const pages = buildPages(photos, extraItems);
+  const isMarriage = album.title.toLowerCase().includes("marriage") || album.title.toLowerCase().includes("wedding");
+  const pages = buildPages(photos, extraItems, isMarriage);
   const totalPages = pages.length;
 
   useEffect(() => {
