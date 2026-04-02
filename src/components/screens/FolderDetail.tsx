@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
-import { ChevronLeft, ArrowUpDown, Plus, Trash2, Edit3, Lock, Share2, Palette, MoreVertical, ImageIcon, Camera } from "lucide-react";
+import { ChevronLeft, ArrowUpDown, Plus, Trash2, Edit3, Lock, Share2, Palette, MoreVertical, ImageIcon, Camera, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import type { Folder, Photo } from "@/lib/mockData";
+import { useAppState } from "@/lib/AppStateContext";
 
 interface FolderDetailProps {
   folder: Folder;
