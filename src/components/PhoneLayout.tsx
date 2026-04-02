@@ -5,6 +5,7 @@ import {
   ChevronDown, Search, Mic, PlayCircle, Signal, Wifi, BatteryFull,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAppState } from "@/lib/AppStateContext";
 
 import bgSkyFloral from "@/assets/bg-sky-floral.png";
 import avatar from "@/assets/avatar.png";
@@ -21,8 +22,6 @@ interface PhoneLayoutProps {
   cards: { id: string; title: string; image: string }[];
   customContent?: React.ReactNode;
   overlay?: React.ReactNode;
-  onCreateFolder?: (data: { name: string; color: string; font: string; hasPassword: boolean; isPrivate: boolean }) => void;
-  onCreateAlbum?: (data: { title: string; category: string; theme: string; isPrivate: boolean }) => void;
 }
 
 type SidebarScreen = null | "dashboard" | "reminders" | "profile" | "offers" | "privacy" | "help" | "how-it-works";
@@ -45,23 +44,10 @@ function SideItem({ label, icon, active, singleLine, onClick }: {
   );
 }
 
-function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
-  return (
-    <div className="transition-all duration-200 ease-out hover:scale-[1.03]" onClick={onClick} style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
-      <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden", position: "relative" }}>
-        <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-      </div>
-      <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
-        <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{title}</span>
-      </div>
-    </div>
-  );
-}
-
-export default function PhoneLayout({ cards, customContent, overlay, onCreateFolder, onCreateAlbum }: PhoneLayoutProps) {
+export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [openedAlbum, setOpenedAlbum] = React.useState<{ image: string; title: string } | null>(null);
+  const { createFolder, createAlbum } = useAppState();
   const [showCreateImport, setShowCreateImport] = React.useState(false);
   const [sidebarScreen, setSidebarScreen] = React.useState<SidebarScreen>(null);
 
@@ -234,7 +220,14 @@ export default function PhoneLayout({ cards, customContent, overlay, onCreateFol
                 {activeContent ? activeContent : (
                   <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12 }}>
                     {cards.map((card) => (
-                      <Card key={card.id} image={card.image} title={card.title} onClick={() => setOpenedAlbum(card)} />
+                      <div key={card.id} className="transition-all duration-200 ease-out hover:scale-[1.03]" style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
+                        <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
+                          <img src={card.image} alt={card.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        </div>
+                        <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
+                          <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{card.title}</span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -247,24 +240,9 @@ export default function PhoneLayout({ cards, customContent, overlay, onCreateFol
           <CreateImportSheet
             open={showCreateImport}
             onClose={() => setShowCreateImport(false)}
-            onCreateFolder={onCreateFolder}
-            onCreateAlbum={onCreateAlbum}
+            onCreateFolder={createFolder}
+            onCreateAlbum={createAlbum}
           />
-
-          {openedAlbum && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{
-              backgroundColor: "rgba(0,0,0,0.6)", borderRadius: 38, zIndex: 50,
-              animation: "albumFadeIn 0.3s ease-out", cursor: "pointer",
-            }} onClick={() => setOpenedAlbum(null)}>
-              <div style={{
-                width: "75%", aspectRatio: "3/4", borderRadius: 12, overflow: "hidden",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.4)", animation: "albumZoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)", position: "relative",
-              }}>
-                <img src={openedAlbum.image} alt={openedAlbum.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)", pointerEvents: "none" }} />
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
