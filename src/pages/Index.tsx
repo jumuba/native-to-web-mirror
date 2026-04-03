@@ -23,15 +23,24 @@ export default function Index() {
 
   const selectedFolder = selectedFolderId ? folders.find((f) => f.id === selectedFolderId) || null : null;
 
-  const handleImportPhotos = (folderId: string, files: File[]) => {
-    const newPhotos = files.map((file, i) => ({
-      id: `imported-${Date.now()}-${i}`,
-      url: URL.createObjectURL(file),
-      title: file.name,
-      date: new Date().toISOString().slice(0, 10),
-      place: "Imported",
-      event: "Import",
-    }));
+  const handleImportPhotos = async (folderId: string, files: File[]) => {
+    const newPhotos = await Promise.all(
+      files.map(async (file, i) => {
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        return {
+          id: `imported-${Date.now()}-${i}`,
+          url: dataUrl,
+          title: file.name,
+          date: new Date().toISOString().slice(0, 10),
+          place: "Imported",
+          event: "Import",
+        };
+      })
+    );
     addPhotosToFolder(folderId, newPhotos);
   };
 
