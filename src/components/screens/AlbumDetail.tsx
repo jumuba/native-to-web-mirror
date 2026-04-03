@@ -704,47 +704,13 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       </button>
 
-      {/* Mini preview of current spread */}
-      {totalSpreads > 0 && (
-        <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
-          width: "100%", height: 80, borderRadius: 8, overflow: "hidden", cursor: "pointer",
-          display: "flex", border: "2px solid #d4c9b0", backgroundColor: "#ebe4d6",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}>
-          {/* Mini left */}
-          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-            {(spreads[0]?.left || []).slice(0, 2).map((item) => (
-              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
-                {item.type === "photo" ? (
-                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>
-                    {item.type === "note" ? "📝" : item.type === "gif" ? "🎞️" : "📄"}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          {/* Mini binder */}
-          <div style={{ width: 10, background: "linear-gradient(90deg, #c9a84c, #f5dea0, #c9a84c)", flexShrink: 0 }} />
-          {/* Mini right */}
-          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-            {(spreads[0]?.right || []).slice(0, 2).map((item) => (
-              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
-                {item.type === "photo" ? (
-                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                ) : item.type === "video" ? (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
-                    <Play size={10} color="#fff" />
-                  </div>
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>📄</div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Album cover preview */}
+      <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
+        width: "100%", borderRadius: 8, overflow: "hidden", cursor: "pointer",
+        border: "2px solid #d4c9b0", boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      }}>
+        <img src={album.image} alt={title} style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+      </div>
 
       {/* Fullscreen scrapbook overlay */}
       {renderScrapbookOverlay()}
