@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Camera,
   ImageIcon,
@@ -111,14 +111,30 @@ function FeatureIcon({ icon, label }: { icon: React.ReactNode; label: string }) 
 function EditorOverlay({
   mode,
   onClose,
+  imageUrl,
 }: {
   mode: "camera" | "photo";
   onClose: () => void;
+  imageUrl: string | null;
 }) {
   const [activeTab, setActiveTab] = useState<EditorTab>("beautify");
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturate, setSaturate] = useState(100);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeFrame, setActiveFrame] = useState<number | null>(null);
   const isCamera = mode === "camera";
   const modeLabel = isCamera ? "Camera" : "Photo Edit";
   const ModeIcon = isCamera ? Camera : ImageIcon;
+
+  const filterStyle = (): React.CSSProperties => ({
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%)${activeFilter ? ` ${activeFilter}` : ""}`,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    display: "block",
+    borderRadius: 8,
+  });
 
   return (
     <div
@@ -169,14 +185,28 @@ function EditorOverlay({
           position: "relative",
         }}
       >
-        <div className="text-center" style={{ color: "#555", fontSize: 12 }}>
-          {isCamera ? (
-            <Camera size={48} color="#444" />
-          ) : (
-            <ImageIcon size={48} color="#444" />
-          )}
-          <p style={{ marginTop: 8 }}>{isCamera ? "Camera Preview" : "Photo Preview"}</p>
-        </div>
+        {imageUrl ? (
+          <img src={imageUrl} alt="Preview" style={filterStyle()} />
+        ) : (
+          <div className="text-center" style={{ color: "#555", fontSize: 12 }}>
+            {isCamera ? (
+              <Camera size={48} color="#444" />
+            ) : (
+              <ImageIcon size={48} color="#444" />
+            )}
+            <p style={{ marginTop: 8 }}>{isCamera ? "Camera Preview" : "Photo Preview"}</p>
+          </div>
+        )}
+        {activeFrame !== null && imageUrl && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 8,
+            border: `4px solid ${previewColors[activeFrame % previewColors.length]}`,
+            pointerEvents: "none",
+            boxShadow: `inset 0 0 20px ${previewColors[activeFrame % previewColors.length]}44`,
+          }} />
+        )}
       </div>
 
       {/* Bottom toolbar icons */}
@@ -239,51 +269,29 @@ function EditorOverlay({
       <div style={{ padding: "4px 8px 16px", minHeight: 80 }}>
         {activeTab === "beautify" && (
           <>
-            {/* Slider */}
+            {/* Brightness slider */}
+            <div className="flex items-center" style={{ padding: "2px 6px 4px", gap: 8 }}>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Brightness</span>
+              <input type="range" min={50} max={150} value={brightness}
+                onChange={e => setBrightness(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{brightness}</span>
+            </div>
+            {/* Contrast slider */}
+            <div className="flex items-center" style={{ padding: "2px 6px 4px", gap: 8 }}>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Contrast</span>
+              <input type="range" min={50} max={150} value={contrast}
+                onChange={e => setContrast(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{contrast}</span>
+            </div>
+            {/* Saturation slider */}
             <div className="flex items-center" style={{ padding: "2px 6px 6px", gap: 8 }}>
-              <div
-                style={{
-                  flex: 1,
-                  height: 3,
-                  backgroundColor: "#333",
-                  borderRadius: 2,
-                  position: "relative",
-                }}
-              >
-                <div
-                  style={{
-                    width: "50%",
-                    height: "100%",
-                    backgroundColor: "#1db954",
-                    borderRadius: 2,
-                  }}
-                />
-                <div
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: "#1db954",
-                    position: "absolute",
-                    top: -3.5,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }}
-                />
-              </div>
-              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>50</span>
-              <div
-                style={{
-                  backgroundColor: "#6b9fff",
-                  borderRadius: 4,
-                  padding: "2px 8px",
-                  fontSize: 9,
-                  color: "#fff",
-                  fontWeight: 600,
-                }}
-              >
-                + preset
-              </div>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Saturation</span>
+              <input type="range" min={0} max={200} value={saturate}
+                onChange={e => setSaturate(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{saturate}</span>
             </div>
             {/* Scrollable beautify icons */}
             <div
@@ -298,8 +306,13 @@ function EditorOverlay({
               {beautifyItems.map((item, i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center flex-shrink-0"
+                  className="flex flex-col items-center flex-shrink-0 cursor-pointer"
                   style={{ width: 48 }}
+                  onClick={() => {
+                    if (item.label === "Reset") {
+                      setBrightness(100); setContrast(100); setSaturate(100); setActiveFilter(null);
+                    }
+                  }}
                 >
                   <div
                     className="flex items-center justify-center"
@@ -307,10 +320,9 @@ function EditorOverlay({
                       width: 32,
                       height: 32,
                       borderRadius: 16,
-                      backgroundColor: i === 1 ? "#333" : "#2a2a2a",
+                      backgroundColor: "#2a2a2a",
                       marginBottom: 3,
                       color: "#ccc",
-                      border: i === 1 ? "1.5px solid #1db954" : "none",
                     }}
                   >
                     {item.icon}
@@ -318,7 +330,7 @@ function EditorOverlay({
                   <span
                     style={{
                       fontSize: 7.5,
-                      color: i === 1 ? "#1db954" : "#888",
+                      color: "#888",
                       textAlign: "center",
                       lineHeight: "9px",
                       fontWeight: 500,
@@ -384,32 +396,43 @@ function EditorOverlay({
               }}
             >
               <div
-                className="flex items-center justify-center flex-shrink-0"
+                className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                onClick={() => setActiveFilter(null)}
                 style={{
                   width: 48,
                   height: 48,
                   borderRadius: 8,
                   backgroundColor: "#2a2a2a",
+                  border: activeFilter === null ? "2px solid #1db954" : "none",
                 }}
               >
                 <X size={16} color="#888" />
               </div>
-              {previewColors.map((color, i) => (
+              {[
+                { name: "Gentle", filter: "sepia(30%) brightness(105%)" },
+                { name: "Cool", filter: "hue-rotate(180deg) saturate(80%)" },
+                { name: "Retro", filter: "sepia(60%) contrast(90%)" },
+                { name: "Forest", filter: "hue-rotate(90deg) saturate(120%)" },
+                { name: "Fresh", filter: "brightness(110%) saturate(130%)" },
+                { name: "Warm", filter: "sepia(20%) saturate(140%) brightness(105%)" },
+              ].map((effect, i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center flex-shrink-0"
+                  className="flex flex-col items-center flex-shrink-0 cursor-pointer"
+                  onClick={() => setActiveFilter(effect.filter)}
                 >
                   <div
                     style={{
                       width: 48,
                       height: 48,
                       borderRadius: 8,
-                      background: `linear-gradient(135deg, ${color}, ${color}88)`,
+                      background: `linear-gradient(135deg, ${previewColors[i]}, ${previewColors[i]}88)`,
                       marginBottom: 3,
+                      border: activeFilter === effect.filter ? "2px solid #1db954" : "none",
                     }}
                   />
-                  <span style={{ fontSize: 7, color: "#888" }}>
-                    {["Gentle", "Cool", "Retro", "Forest", "Fresh", "Warm"][i]}
+                  <span style={{ fontSize: 7, color: activeFilter === effect.filter ? "#1db954" : "#888" }}>
+                    {effect.name}
                   </span>
                 </div>
               ))}
@@ -458,12 +481,14 @@ function EditorOverlay({
               }}
             >
               <div
-                className="flex items-center justify-center flex-shrink-0"
+                className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                onClick={() => setActiveFrame(null)}
                 style={{
                   width: 48,
                   height: 48,
                   borderRadius: 8,
                   backgroundColor: "#2a2a2a",
+                  border: activeFrame === null ? "2px solid #1db954" : "none",
                 }}
               >
                 <X size={16} color="#888" />
@@ -471,13 +496,14 @@ function EditorOverlay({
               {["🐰", "🎨", "🎂", "⭐", "🌸", "🎭"].map((emoji, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-center flex-shrink-0"
+                  className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  onClick={() => setActiveFrame(i)}
                   style={{
                     width: 48,
                     height: 48,
                     borderRadius: 8,
                     backgroundColor: "#2a2a2a",
-                    border: "2px solid #444",
+                    border: activeFrame === i ? "2px solid #1db954" : "2px solid #444",
                     fontSize: 20,
                   }}
                 >
@@ -494,15 +520,46 @@ function EditorOverlay({
 
 export default function PhotoVideoEdit() {
   const [editorMode, setEditorMode] = useState<EditorMode>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
-  /* Custom content for the grid area of PhoneLayout */
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>, mode: "camera" | "photo") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result as string);
+      setEditorMode(mode);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const customContent = (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* Hidden file inputs */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: "none" }}
+        onChange={(e) => handleFileSelected(e, "camera")}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*,video/*"
+        style={{ display: "none" }}
+        onChange={(e) => handleFileSelected(e, "photo")}
+      />
+
       {/* Two main icons: Camera & Photo */}
       <div className="flex items-center justify-center" style={{ gap: 24, marginBottom: 16 }}>
         <div
           className="flex flex-col items-center cursor-pointer transition-transform hover:scale-105"
-          onClick={() => setEditorMode("camera")}
+          onClick={() => cameraInputRef.current?.click()}
         >
           <div
             className="flex items-center justify-center"
@@ -521,7 +578,7 @@ export default function PhotoVideoEdit() {
 
         <div
           className="flex flex-col items-center cursor-pointer transition-transform hover:scale-105"
-          onClick={() => setEditorMode("photo")}
+          onClick={() => photoInputRef.current?.click()}
         >
           <div
             className="flex items-center justify-center"
@@ -557,7 +614,11 @@ export default function PhotoVideoEdit() {
       customContent={customContent}
       overlay={
         editorMode ? (
-          <EditorOverlay mode={editorMode} onClose={() => setEditorMode(null)} />
+          <EditorOverlay
+            mode={editorMode}
+            imageUrl={selectedImage}
+            onClose={() => { setEditorMode(null); setSelectedImage(null); }}
+          />
         ) : null
       }
     />
