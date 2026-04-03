@@ -267,7 +267,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         return (
           <div key={item.id} onClick={() => onVideoClick(item.content)} style={{
             width: "100%", height: h, borderRadius: 4, overflow: "hidden",
-            border: "3px solid #e74c3c", cursor: "pointer", position: "relative",
+            border: "2px solid #e74c3c", cursor: "pointer", position: "relative",
             backgroundColor: "#000",
           }}>
             {item.label && (
