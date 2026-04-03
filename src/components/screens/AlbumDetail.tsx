@@ -246,8 +246,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     switch (item.type) {
       case "photo":
         return (
-          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "3px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "2px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", backgroundColor: "#f5f0e8" }}>
+            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
           </div>
         );
       case "note":
