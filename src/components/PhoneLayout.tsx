@@ -141,7 +141,7 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
 
           {/* Header */}
           <div className="text-center" style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 30, color: "#5665c9", fontWeight: 400, letterSpacing: 0, margin: 0 }}>Spark</h1>
+            <h1 style={{ fontSize: 24, color: "#5665c9", fontWeight: 400, letterSpacing: 0, margin: 0 }}>SmartMemory</h1>
           </div>
 
           {/* Content Section */}
