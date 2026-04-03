@@ -269,51 +269,29 @@ function EditorOverlay({
       <div style={{ padding: "4px 8px 16px", minHeight: 80 }}>
         {activeTab === "beautify" && (
           <>
-            {/* Slider */}
+            {/* Brightness slider */}
+            <div className="flex items-center" style={{ padding: "2px 6px 4px", gap: 8 }}>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Brightness</span>
+              <input type="range" min={50} max={150} value={brightness}
+                onChange={e => setBrightness(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{brightness}</span>
+            </div>
+            {/* Contrast slider */}
+            <div className="flex items-center" style={{ padding: "2px 6px 4px", gap: 8 }}>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Contrast</span>
+              <input type="range" min={50} max={150} value={contrast}
+                onChange={e => setContrast(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{contrast}</span>
+            </div>
+            {/* Saturation slider */}
             <div className="flex items-center" style={{ padding: "2px 6px 6px", gap: 8 }}>
-              <div
-                style={{
-                  flex: 1,
-                  height: 3,
-                  backgroundColor: "#333",
-                  borderRadius: 2,
-                  position: "relative",
-                }}
-              >
-                <div
-                  style={{
-                    width: "50%",
-                    height: "100%",
-                    backgroundColor: "#1db954",
-                    borderRadius: 2,
-                  }}
-                />
-                <div
-                  style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: "#1db954",
-                    position: "absolute",
-                    top: -3.5,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }}
-                />
-              </div>
-              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>50</span>
-              <div
-                style={{
-                  backgroundColor: "#6b9fff",
-                  borderRadius: 4,
-                  padding: "2px 8px",
-                  fontSize: 9,
-                  color: "#fff",
-                  fontWeight: 600,
-                }}
-              >
-                + preset
-              </div>
+              <span style={{ color: "#888", fontSize: 9, minWidth: 50 }}>Saturation</span>
+              <input type="range" min={0} max={200} value={saturate}
+                onChange={e => setSaturate(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "#1db954", height: 3 }} />
+              <span style={{ color: "#aaa", fontSize: 10, minWidth: 18 }}>{saturate}</span>
             </div>
             {/* Scrollable beautify icons */}
             <div
