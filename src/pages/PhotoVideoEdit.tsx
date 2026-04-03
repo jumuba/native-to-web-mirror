@@ -185,14 +185,28 @@ function EditorOverlay({
           position: "relative",
         }}
       >
-        <div className="text-center" style={{ color: "#555", fontSize: 12 }}>
-          {isCamera ? (
-            <Camera size={48} color="#444" />
-          ) : (
-            <ImageIcon size={48} color="#444" />
-          )}
-          <p style={{ marginTop: 8 }}>{isCamera ? "Camera Preview" : "Photo Preview"}</p>
-        </div>
+        {imageUrl ? (
+          <img src={imageUrl} alt="Preview" style={filterStyle()} />
+        ) : (
+          <div className="text-center" style={{ color: "#555", fontSize: 12 }}>
+            {isCamera ? (
+              <Camera size={48} color="#444" />
+            ) : (
+              <ImageIcon size={48} color="#444" />
+            )}
+            <p style={{ marginTop: 8 }}>{isCamera ? "Camera Preview" : "Photo Preview"}</p>
+          </div>
+        )}
+        {activeFrame !== null && imageUrl && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 8,
+            border: `4px solid ${previewColors[activeFrame % previewColors.length]}`,
+            pointerEvents: "none",
+            boxShadow: `inset 0 0 20px ${previewColors[activeFrame % previewColors.length]}44`,
+          }} />
+        )}
       </div>
 
       {/* Bottom toolbar icons */}
