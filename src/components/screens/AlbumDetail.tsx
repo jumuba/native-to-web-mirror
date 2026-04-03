@@ -246,8 +246,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     switch (item.type) {
       case "photo":
         return (
-          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "3px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "2px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", backgroundColor: "#f5f0e8" }}>
+            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
           </div>
         );
       case "note":
@@ -267,7 +267,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         return (
           <div key={item.id} onClick={() => onVideoClick(item.content)} style={{
             width: "100%", height: h, borderRadius: 4, overflow: "hidden",
-            border: "3px solid #e74c3c", cursor: "pointer", position: "relative",
+            border: "2px solid #e74c3c", cursor: "pointer", position: "relative",
             backgroundColor: "#000",
           }}>
             {item.label && (
@@ -275,7 +275,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
                 <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>{item.label}</span>
               </div>
             )}
-            <video src={item.content} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <video src={item.content} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
             <div style={{
               position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
               width: 40, height: 40, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.85)",
@@ -704,47 +704,13 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       </button>
 
-      {/* Mini preview of current spread */}
-      {totalSpreads > 0 && (
-        <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
-          width: "100%", height: 80, borderRadius: 8, overflow: "hidden", cursor: "pointer",
-          display: "flex", border: "2px solid #d4c9b0", backgroundColor: "#ebe4d6",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}>
-          {/* Mini left */}
-          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-            {(spreads[0]?.left || []).slice(0, 2).map((item) => (
-              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
-                {item.type === "photo" ? (
-                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>
-                    {item.type === "note" ? "📝" : item.type === "gif" ? "🎞️" : "📄"}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          {/* Mini binder */}
-          <div style={{ width: 10, background: "linear-gradient(90deg, #c9a84c, #f5dea0, #c9a84c)", flexShrink: 0 }} />
-          {/* Mini right */}
-          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-            {(spreads[0]?.right || []).slice(0, 2).map((item) => (
-              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
-                {item.type === "photo" ? (
-                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                ) : item.type === "video" ? (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
-                    <Play size={10} color="#fff" />
-                  </div>
-                ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>📄</div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Album cover preview */}
+      <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
+        width: "100%", borderRadius: 8, overflow: "hidden", cursor: "pointer",
+        border: "2px solid #d4c9b0", boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      }}>
+        <img src={album.image} alt={title} style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+      </div>
 
       {/* Fullscreen scrapbook overlay */}
       {renderScrapbookOverlay()}
