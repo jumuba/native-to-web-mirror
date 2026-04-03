@@ -1,5 +1,13 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { mockFolders, mockAlbums, type Folder, type Album, type Photo } from "./mockData";
+
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return fallback;
+}
 
 interface AppState {
   folders: Folder[];
@@ -20,8 +28,11 @@ interface AppState {
 const AppStateContext = createContext<AppState | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [folders, setFolders] = useState<Folder[]>(mockFolders);
-  const [albums, setAlbums] = useState<Album[]>(mockAlbums);
+  const [folders, setFolders] = useState<Folder[]>(() => loadFromStorage("folders", mockFolders));
+  const [albums, setAlbums] = useState<Album[]>(() => loadFromStorage("albums", mockAlbums));
+
+  useEffect(() => { localStorage.setItem("folders", JSON.stringify(folders)); }, [folders]);
+  useEffect(() => { localStorage.setItem("albums", JSON.stringify(albums)); }, [albums]);
 
   const createFolder = useCallback((data: { name: string; color: string; font: string; hasPassword: boolean; isPrivate: boolean }) => {
     const newFolder: Folder = {
