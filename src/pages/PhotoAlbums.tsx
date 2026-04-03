@@ -22,23 +22,36 @@ export default function PhotoAlbums() {
 
   const selectedAlbum = selectedAlbumId ? albums.find((a) => a.id === selectedAlbumId) || null : null;
 
+  const compressImage = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ratio = Math.min(maxWidth / img.width, 1);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImportPhotos = async (albumId: string, files: File[]) => {
     const newPhotos = await Promise.all(
-      files.map(async (file, i) => {
-        const dataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-        return {
-          id: `imported-${Date.now()}-${i}`,
-          url: dataUrl,
-          title: file.name,
-          date: new Date().toISOString().slice(0, 10),
-          place: "Imported",
-          event: "Import",
-        };
-      })
+      files.map(async (file, i) => ({
+        id: `imported-${Date.now()}-${i}`,
+        url: await compressImage(file),
+        title: file.name,
+        date: new Date().toISOString().slice(0, 10),
+        place: "Imported",
+        event: "Import",
+      }))
     );
     addPhotosToAlbum(albumId, newPhotos);
   };
