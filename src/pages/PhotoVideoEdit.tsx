@@ -502,15 +502,46 @@ function EditorOverlay({
 
 export default function PhotoVideoEdit() {
   const [editorMode, setEditorMode] = useState<EditorMode>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
-  /* Custom content for the grid area of PhoneLayout */
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>, mode: "camera" | "photo") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImage(reader.result as string);
+      setEditorMode(mode);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const customContent = (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* Hidden file inputs */}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: "none" }}
+        onChange={(e) => handleFileSelected(e, "camera")}
+      />
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/*,video/*"
+        style={{ display: "none" }}
+        onChange={(e) => handleFileSelected(e, "photo")}
+      />
+
       {/* Two main icons: Camera & Photo */}
       <div className="flex items-center justify-center" style={{ gap: 24, marginBottom: 16 }}>
         <div
           className="flex flex-col items-center cursor-pointer transition-transform hover:scale-105"
-          onClick={() => setEditorMode("camera")}
+          onClick={() => cameraInputRef.current?.click()}
         >
           <div
             className="flex items-center justify-center"
@@ -529,7 +560,7 @@ export default function PhotoVideoEdit() {
 
         <div
           className="flex flex-col items-center cursor-pointer transition-transform hover:scale-105"
-          onClick={() => setEditorMode("photo")}
+          onClick={() => photoInputRef.current?.click()}
         >
           <div
             className="flex items-center justify-center"
@@ -565,7 +596,11 @@ export default function PhotoVideoEdit() {
       customContent={customContent}
       overlay={
         editorMode ? (
-          <EditorOverlay mode={editorMode} onClose={() => setEditorMode(null)} />
+          <EditorOverlay
+            mode={editorMode}
+            imageUrl={selectedImage}
+            onClose={() => { setEditorMode(null); setSelectedImage(null); }}
+          />
         ) : null
       }
     />
