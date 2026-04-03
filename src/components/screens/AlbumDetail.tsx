@@ -275,7 +275,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
                 <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>{item.label}</span>
               </div>
             )}
-            <video src={item.content} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <video src={item.content} style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
             <div style={{
               position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
               width: 40, height: 40, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.85)",
