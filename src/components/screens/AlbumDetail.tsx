@@ -240,16 +240,29 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     setShowShareSheet(false);
   };
 
+  // Resizable photo item component
+  const ResizablePhoto = ({ item, h }: { item: PageItem; h: string }) => {
+    const [scale, setScale] = useState(100); // percentage
+    return (
+      <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "2px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", backgroundColor: "#f5f0e8", position: "relative" }}>
+        <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", transform: `scale(${scale / 100})`, transformOrigin: "center center", transition: "transform 0.15s ease" }} />
+        <input
+          type="range" min={30} max={200} value={scale}
+          onChange={(e) => setScale(Number(e.target.value))}
+          onClick={(e) => e.stopPropagation()}
+          style={{ position: "absolute", bottom: 2, left: "10%", width: "80%", height: 12, opacity: 0.7, cursor: "pointer", zIndex: 5 }}
+          title={`Size: ${scale}%`}
+        />
+      </div>
+    );
+  };
+
   // Render a single item inside the book spread
   const renderSpreadItem = (item: PageItem, itemCount: number, onVideoClick: (url: string) => void) => {
     const h = itemCount === 1 ? "100%" : "48%";
     switch (item.type) {
       case "photo":
-        return (
-          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "2px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", backgroundColor: "#f5f0e8" }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
-          </div>
-        );
+        return <ResizablePhoto key={item.id} item={item} h={h} />;
       case "note":
         return (
           <div key={item.id} style={{
