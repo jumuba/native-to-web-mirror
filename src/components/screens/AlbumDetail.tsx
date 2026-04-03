@@ -244,13 +244,13 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const ResizablePhoto = ({ item, h }: { item: PageItem; h: string }) => {
     const [scale, setScale] = useState(100); // percentage
     return (
-      <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "2px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)", backgroundColor: "#f5f0e8", position: "relative" }}>
-        <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block", transform: `scale(${scale / 100})`, transformOrigin: "center center", transition: "transform 0.15s ease" }} />
+      <div key={item.id} style={{ width: "100%", height: h, borderRadius: 0, overflow: "hidden", position: "relative" }}>
+        <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: `scale(${scale / 100})`, transformOrigin: "center center", transition: "transform 0.15s ease" }} />
         <input
-          type="range" min={30} max={200} value={scale}
+          type="range" min={50} max={200} value={scale}
           onChange={(e) => setScale(Number(e.target.value))}
           onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", bottom: 2, left: "10%", width: "80%", height: 12, opacity: 0.7, cursor: "pointer", zIndex: 5 }}
+          style={{ position: "absolute", bottom: 4, left: "10%", width: "80%", height: 14, opacity: 0.8, cursor: "pointer", zIndex: 5 }}
           title={`Size: ${scale}%`}
         />
       </div>
