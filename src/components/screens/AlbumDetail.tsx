@@ -3,7 +3,7 @@ import {
   ChevronLeft, ChevronRight, Share2, Download, Music, MessageSquare,
   Smile, Mic, Heart, ImageIcon, Plus, Users, Lock,
   Edit3, Trash2, MoreVertical, MicOff, Camera, Video, Mail,
-  DollarSign, Ticket,
+  DollarSign, Ticket, X, Play,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Album, Note } from "@/lib/mockData";
@@ -26,6 +26,8 @@ type PageItem = {
   label?: string;
 };
 
+type Spread = { left: PageItem[]; right: PageItem[] };
+
 const EMOJI_LIST = ["❤️", "😍", "🎉", "🥳", "🎂", "🌟", "💐", "🎶", "😂", "🥰", "👏", "🙌", "💕", "✨", "🎁", "🌺", "😊", "🤗", "💖", "🔥", "👶", "💒", "🎵", "🌈"];
 
 const GIF_LIST = [
@@ -37,64 +39,81 @@ const GIF_LIST = [
   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWI3dXdzaHhjYnplOXBtNndwcjlqZjV5OXU2cG9lOHNtdzFjdHRkZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0MYt5jPR6QX5pnqM/giphy.gif",
 ];
 
-
-const MARRIAGE_DEMO_PAGES: PageItem[][] = [
-  // Page 1: Note
-  [{ type: "note", content: "Happy Marriage to David & Ariane 💒✨\nWishing you a lifetime of love and happiness together!", id: "demo-note-1" }],
-  // Page 2: 2 photos
-  [
-    { type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p1" },
-    { type: "photo", content: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop", id: "demo-p2" },
-  ],
-  // Page 3: Video
-  [{ type: "video", content: "https://www.w3schools.com/html/mov_bbb.mp4", id: "demo-video-1", label: "🎬 Click to watch the wedding video" }],
-  // Page 4: 2 photos
-  [
-    { type: "photo", content: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=300&fit=crop", id: "demo-p3" },
-    { type: "photo", content: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=300&fit=crop", id: "demo-p4" },
-  ],
-  // Page 5: Large GIF
-  [{ type: "gif", content: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWd6MmVwbTl5ZnFzNXNhN2h4bHlhNXA2OGN5MGtzZXR6enoyeWN1aCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlBO7eyXzSZkJri/giphy.gif", id: "demo-gif-1", label: "🎉 Happy Marriage!" }],
-  // Page 6: 2 photos
-  [
-    { type: "photo", content: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=300&fit=crop", id: "demo-p5" },
-    { type: "photo", content: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=400&h=300&fit=crop", id: "demo-p6" },
-  ],
-  // Page 7: Music + Voucher
-  [
-    { type: "music", content: "A Thousand Years – Christina Perri", id: "demo-music-1", label: "🎵 Click to listen to the music" },
-    { type: "voucher", content: "🎟️ Gift Voucher — €200 Spa Weekend for the newlyweds!", id: "demo-voucher-1" },
-  ],
+// Marriage demo spreads matching reference images
+const MARRIAGE_DEMO_SPREADS: Spread[] = [
+  // Spread 1: Note page
+  {
+    left: [{ type: "note", content: "Happy Marriage to David & Ariane 💒✨\n\nWishing you a lifetime of love and happiness together!", id: "demo-note-1" }],
+    right: [{ type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p0" }],
+  },
+  // Spread 2: 4 photos (2 left, 2 right)
+  {
+    left: [
+      { type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p1" },
+      { type: "photo", content: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop", id: "demo-p2" },
+    ],
+    right: [
+      { type: "photo", content: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=300&fit=crop", id: "demo-p3" },
+      { type: "photo", content: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400&h=300&fit=crop", id: "demo-p4" },
+    ],
+  },
+  // Spread 3: GIF left + flowers/gift right
+  {
+    left: [{ type: "gif", content: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWd6MmVwbTl5ZnFzNXNhN2h4bHlhNXA2OGN5MGtzZXR6enoyeWN1aCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlBO7eyXzSZkJri/giphy.gif", id: "demo-gif-1", label: "🎉 Happy Marriage!" }],
+    right: [{ type: "photo", content: "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=400&h=500&fit=crop", id: "demo-flowers" }],
+  },
+  // Spread 4: 2 photos left + video & photo right
+  {
+    left: [
+      { type: "photo", content: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=300&fit=crop", id: "demo-p5" },
+      { type: "photo", content: "https://images.unsplash.com/photo-1529636798458-92182e662485?w=400&h=300&fit=crop", id: "demo-p6" },
+    ],
+    right: [
+      { type: "video", content: "https://www.w3schools.com/html/mov_bbb.mp4", id: "demo-video-1", label: "🎬 click to watch this video" },
+      { type: "photo", content: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop", id: "demo-p7" },
+    ],
+  },
+  // Spread 5: Music + Voucher
+  {
+    left: [
+      { type: "music", content: "A Thousand Years – Christina Perri", id: "demo-music-1", label: "🎵 Click to listen to the music" },
+    ],
+    right: [
+      { type: "voucher", content: "🎟️ Gift Voucher — €200 Spa Weekend for the newlyweds!", id: "demo-voucher-1" },
+    ],
+  },
 ];
 
-// Build album pages from photos + content items
-function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): PageItem[][] {
+function buildSpreads(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): Spread[] {
   if (isMarriage) {
-    // For marriage albums, show demo scrapbook pages first, then any user-added content
     const userItems: PageItem[] = [
       ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
       ...items,
     ];
-    const extraPages: PageItem[][] = [];
+    const extraSpreads: Spread[] = [];
     let i = 0;
     while (i < userItems.length) {
-      extraPages.push(userItems.slice(i, i + 2));
-      i += 2;
+      const left = userItems.slice(i, i + 2);
+      const right = userItems.slice(i + 2, i + 4);
+      if (left.length > 0) extraSpreads.push({ left, right });
+      i += 4;
     }
-    return [...MARRIAGE_DEMO_PAGES, ...extraPages];
+    return [...MARRIAGE_DEMO_SPREADS, ...extraSpreads];
   }
   const allItems: PageItem[] = [
     ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
     ...items,
   ];
-  if (allItems.length === 0) return [[]];
-  const pages: PageItem[][] = [];
+  if (allItems.length === 0) return [];
+  const spreads: Spread[] = [];
   let i = 0;
   while (i < allItems.length) {
-    pages.push(allItems.slice(i, i + 2));
-    i += 2;
+    const left = allItems.slice(i, i + 2);
+    const right = allItems.slice(i + 2, i + 4);
+    if (left.length > 0) spreads.push({ left, right });
+    i += 4;
   }
-  return pages;
+  return spreads;
 }
 
 export default function AlbumDetail({ album, onBack, onDelete, onRename, onImportPhotos, onChangeCover, onUpdateAlbum }: AlbumDetailProps) {
@@ -110,13 +129,15 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentSpread, setCurrentSpread] = useState(0);
   const [noteText, setNoteText] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
   const [musicUrl, setMusicUrl] = useState("");
   const videoInputRef = useRef<HTMLInputElement>(null);
-  // Extra content items added to pages
+  const [viewingScrapbook, setViewingScrapbook] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+
   const [extraItems, setExtraItems] = useState<PageItem[]>(() => {
     const items: PageItem[] = [];
     album.notes.forEach((n) => items.push({ type: "note", content: n.text, id: n.id }));
@@ -132,31 +153,19 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
 
   const photos = album.photos;
   const isMarriage = album.title.toLowerCase().includes("marriage") || album.title.toLowerCase().includes("wedding");
-  const pages = buildPages(photos, extraItems, isMarriage);
-  const totalPages = pages.length;
+  const spreads = buildSpreads(photos, extraItems, isMarriage);
+  const totalSpreads = spreads.length;
 
-  useEffect(() => {
-    setTitle(album.title);
-  }, [album.title]);
+  useEffect(() => { setTitle(album.title); }, [album.title]);
+  useEffect(() => { return () => { if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current); }; }, []);
+  useEffect(() => { if (currentSpread >= totalSpreads && totalSpreads > 0) setCurrentSpread(totalSpreads - 1); }, [totalSpreads, currentSpread]);
 
-  useEffect(() => {
-    return () => { if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current); };
-  }, []);
-
-  // Keep currentPage in bounds
-  useEffect(() => {
-    if (currentPage >= totalPages && totalPages > 0) setCurrentPage(totalPages - 1);
-  }, [totalPages, currentPage]);
-
-  const goNext = () => { if (currentPage < totalPages - 1) setCurrentPage(currentPage + 1); };
-  const goPrev = () => { if (currentPage > 0) setCurrentPage(currentPage - 1); };
+  const goNext = () => { if (currentSpread < totalSpreads - 1) setCurrentSpread(currentSpread + 1); };
+  const goPrev = () => { if (currentSpread > 0) setCurrentSpread(currentSpread - 1); };
 
   const handleRenameConfirm = () => {
     setRenaming(false);
-    if (title.trim() && title !== album.title) {
-      onRename?.(title.trim());
-      toast.success(`Renamed to "${title.trim()}"`);
-    }
+    if (title.trim() && title !== album.title) { onRename?.(title.trim()); toast.success(`Renamed to "${title.trim()}"`); }
   };
 
   const handleAddPhotos = () => fileInputRef.current?.click();
@@ -167,7 +176,6 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     onImportPhotos?.(files);
     e.target.value = "";
   };
-
   const handleCoverFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -176,54 +184,36 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     setShowCoverPicker(false);
     e.target.value = "";
   };
-
   const handleAddNote = () => {
     if (!noteText.trim()) return;
     setExtraItems((prev) => [...prev, { type: "note", content: noteText, id: `note-${Date.now()}` }]);
-    setNoteText("");
-    setShowNoteInput(false);
-    toast.success("Note added to album!");
-    // Jump to last page
-    setTimeout(() => setCurrentPage(Math.max(0, Math.ceil((photos.length + extraItems.length + 1) / 2) - 1)), 50);
+    setNoteText(""); setShowNoteInput(false); toast.success("Note added!");
   };
-
   const handleAddEmoji = (emoji: string) => {
     setExtraItems((prev) => [...prev, { type: "emoji", content: emoji, id: `emoji-${Date.now()}` }]);
-    setShowEmojiPicker(false);
-    toast.success("Emoji added!");
-    setTimeout(() => setCurrentPage(Math.max(0, Math.ceil((photos.length + extraItems.length + 1) / 2) - 1)), 50);
+    setShowEmojiPicker(false); toast.success("Emoji added!");
   };
-
   const handleAddGif = (url: string) => {
     setExtraItems((prev) => [...prev, { type: "gif", content: url, id: `gif-${Date.now()}` }]);
-    setShowGifPicker(false);
-    toast.success("GIF added!");
-    setTimeout(() => setCurrentPage(Math.max(0, Math.ceil((photos.length + extraItems.length + 1) / 2) - 1)), 50);
+    setShowGifPicker(false); toast.success("GIF added!");
   };
-
   const handleAddMusic = () => {
     if (!musicUrl.trim()) return;
     setExtraItems((prev) => [...prev, { type: "music", content: musicUrl, id: `music-${Date.now()}` }]);
-    setMusicUrl("");
-    setShowMusicInput(false);
-    toast.success("Music added!");
+    setMusicUrl(""); setShowMusicInput(false); toast.success("Music added!");
   };
-
   const handleAddVideo = () => videoInputRef.current?.click();
   const handleVideoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = URL.createObjectURL(file);
     setExtraItems((prev) => [...prev, { type: "video", content: url, id: `video-${Date.now()}` }]);
-    toast.success("Video added!");
-    e.target.value = "";
+    toast.success("Video added!"); e.target.value = "";
   };
-
   const handleAddGreetingCard = () => {
     setExtraItems((prev) => [...prev, { type: "greeting", content: "🎉 Happy Celebration!", id: `greeting-${Date.now()}` }]);
     toast.success("Greeting card added!");
   };
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -232,132 +222,136 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       recorder.ondataavailable = (e) => chunks.push(e.data);
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const url = URL.createObjectURL(blob);
         setExtraItems((prev) => [...prev, { type: "voice", content: `🎤 Voice (${recordingTime}s)`, id: `voice-${Date.now()}` }]);
-        toast.success("Voice message added!");
-        setRecordingTime(0);
+        toast.success("Voice message added!"); setRecordingTime(0);
       };
-      recorder.start();
-      mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-      setRecordingTime(0);
+      recorder.start(); mediaRecorderRef.current = recorder; setIsRecording(true); setRecordingTime(0);
       recordingIntervalRef.current = window.setInterval(() => setRecordingTime((t) => t + 1), 1000);
-    } catch {
-      toast.error("Microphone access denied");
-    }
+    } catch { toast.error("Microphone access denied"); }
   };
-
   const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
+    mediaRecorderRef.current?.stop(); setIsRecording(false);
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
   };
-
   const handleShare = async (type: "album" | "folder" | "photos") => {
-    const shareTitle = type === "album" ? `Album: ${title}` : "Selected photos";
     if (navigator.share) {
-      try { await navigator.share({ title: shareTitle, text: `Check out ${shareTitle} on SmartMemory App!`, url: window.location.href }); } catch {}
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied!");
-    }
+      try { await navigator.share({ title: `Album: ${title}`, text: `Check out this album!`, url: window.location.href }); } catch {}
+    } else { await navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
     setShowShareSheet(false);
   };
 
-  const renderPageItem = (item: PageItem, isFullPage: boolean = false) => {
-    const photoHeight = isFullPage ? 130 : 100;
+  // Render a single item inside the book spread
+  const renderSpreadItem = (item: PageItem, itemCount: number, onVideoClick: (url: string) => void) => {
+    const h = itemCount === 1 ? "100%" : "48%";
     switch (item.type) {
       case "photo":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", boxShadow: "0 3px 12px rgba(0,0,0,0.15)", marginBottom: 8, border: "3px solid #fff", transform: "rotate(-0.5deg)" }}>
-            <img src={item.content} alt="" style={{ width: "100%", height: photoHeight, objectFit: "cover", display: "block" }} />
+          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "3px solid #1a2744", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+            <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         );
       case "note":
         return (
           <div key={item.id} style={{
-            backgroundColor: "#fffdf0", borderRadius: 10, padding: "14px 16px", marginBottom: 8,
-            border: "1px solid #f0e6b8", boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            backgroundImage: "repeating-linear-gradient(transparent, transparent 18px, #e8dfc0 18px, #e8dfc0 19px)",
-            minHeight: isFullPage ? 140 : undefined,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            backgroundColor: "#fffdf0", border: "3px solid #1a2744",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 12,
+            backgroundImage: "repeating-linear-gradient(transparent, transparent 22px, #e8dfc0 22px, #e8dfc0 23px)",
           }}>
-            <p style={{ fontSize: 12, color: "#5a4e1a", margin: 0, fontStyle: "italic", textAlign: "center", lineHeight: 1.6, fontWeight: 600, whiteSpace: "pre-line" }}>
+            <p style={{ fontSize: 13, color: "#5a4e1a", margin: 0, fontStyle: "italic", textAlign: "center", lineHeight: 1.6, fontWeight: 600, whiteSpace: "pre-line" }}>
               📝 {item.content}
             </p>
           </div>
         );
-      case "emoji":
+      case "video":
         return (
-          <div key={item.id} className="flex items-center justify-center" style={{ marginBottom: 8 }}>
-            <span style={{ fontSize: 36 }}>{item.content}</span>
+          <div key={item.id} onClick={() => onVideoClick(item.content)} style={{
+            width: "100%", height: h, borderRadius: 4, overflow: "hidden",
+            border: "3px solid #e74c3c", cursor: "pointer", position: "relative",
+            backgroundColor: "#000",
+          }}>
+            {item.label && (
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 2, padding: "4px 8px", backgroundColor: "rgba(231,76,60,0.9)" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#fff" }}>{item.label}</span>
+              </div>
+            )}
+            <video src={item.content} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <div style={{
+              position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+              width: 40, height: 40, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.85)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Play size={20} color="#e74c3c" fill="#e74c3c" />
+            </div>
           </div>
         );
       case "gif":
         return (
-          <div key={item.id} style={{ width: "100%", borderRadius: 8, overflow: "hidden", marginBottom: 8, textAlign: "center" }}>
-            {item.label && <p style={{ fontSize: 11, fontWeight: 700, color: "#9d174d", margin: "0 0 6px", textAlign: "center" }}>{item.label}</p>}
-            <img src={item.content} alt="GIF" style={{ width: "100%", height: isFullPage ? 160 : 90, objectFit: "cover", display: "block", borderRadius: 8, border: "3px solid #f9a8d4" }} />
-          </div>
-        );
-      case "voice":
-        return (
-          <div key={item.id} style={{ backgroundColor: "#eef2fb", borderRadius: 8, padding: "8px 10px", marginBottom: 8 }}>
-            <p style={{ fontSize: 10, color: "#394460", margin: 0 }}>{item.content}</p>
+          <div key={item.id} style={{ width: "100%", height: h, borderRadius: 4, overflow: "hidden", border: "3px solid #1a2744", position: "relative" }}>
+            {item.label && <div style={{ position: "absolute", bottom: 6, left: 0, right: 0, textAlign: "center", zIndex: 2 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", textShadow: "0 1px 4px rgba(0,0,0,0.7)", backgroundColor: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 4 }}>{item.label}</span>
+            </div>}
+            <img src={item.content} alt="GIF" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         );
       case "music":
         return (
           <div key={item.id} style={{
-            backgroundColor: "#f0eeff", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
-            border: "2px solid #d8d0f8", textAlign: "center", cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            backgroundColor: "#f0eeff", border: "3px solid #1a2744",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 12,
           }}>
-            <p style={{ fontSize: 22, margin: "0 0 4px" }}>🎵</p>
-            <p style={{ fontSize: 10, color: "#5b4fa0", margin: 0, fontWeight: 700 }}>{item.label || item.content}</p>
-            <p style={{ fontSize: 8, color: "#8b7fd0", margin: "3px 0 0" }}>Tap to play</p>
-          </div>
-        );
-      case "video":
-        return (
-          <div key={item.id} style={{
-            width: "100%", borderRadius: 10, overflow: "hidden", marginBottom: 8,
-            boxShadow: "0 3px 12px rgba(0,0,0,0.15)", textAlign: "center",
-            backgroundColor: "#1a1a2e", position: "relative",
-          }}>
-            {item.label && (
-              <p style={{ fontSize: 10, fontWeight: 700, color: "#fff", padding: "8px 8px 4px", margin: 0, backgroundColor: "rgba(0,0,0,0.6)" }}>
-                {item.label}
-              </p>
-            )}
-            <video src={item.content} controls poster="" style={{ width: "100%", height: isFullPage ? 140 : 100, objectFit: "cover", display: "block" }} />
-          </div>
-        );
-      case "greeting":
-        return (
-          <div key={item.id} style={{ backgroundColor: "#fff0f6", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #f9a8d4", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 18, margin: 0 }}>💌</p>
-            <p style={{ fontSize: 10, color: "#9d174d", margin: 0, fontWeight: 600 }}>{item.content}</p>
-          </div>
-        );
-      case "money":
-        return (
-          <div key={item.id} style={{ backgroundColor: "#f0fdf4", borderRadius: 10, padding: "12px 10px", marginBottom: 8, border: "2px solid #86efac", textAlign: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
-            <p style={{ fontSize: 18, margin: 0 }}>💰</p>
-            <p style={{ fontSize: 10, color: "#166534", margin: 0, fontWeight: 600 }}>{item.content}</p>
+            <span style={{ fontSize: 36 }}>🎵</span>
+            <p style={{ fontSize: 11, color: "#5b4fa0", margin: "8px 0 0", fontWeight: 700, textAlign: "center" }}>{item.label || item.content}</p>
+            <p style={{ fontSize: 9, color: "#8b7fd0", margin: "4px 0 0" }}>Tap to play</p>
           </div>
         );
       case "voucher":
         return (
           <div key={item.id} style={{
-            backgroundColor: "#fefce8", borderRadius: 10, padding: "12px 10px", marginBottom: 8,
-            border: "2px dashed #fbbf24", textAlign: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            backgroundImage: "radial-gradient(circle at 0% 50%, transparent 8px, #fefce8 8px), radial-gradient(circle at 100% 50%, transparent 8px, #fefce8 8px)",
+            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            backgroundColor: "#fefce8", border: "3px dashed #fbbf24",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 12,
           }}>
-            <p style={{ fontSize: 18, margin: 0 }}>🎟️</p>
-            <p style={{ fontSize: 10, color: "#854d0e", margin: 0, fontWeight: 600 }}>{item.content}</p>
+            <span style={{ fontSize: 30 }}>🎟️</span>
+            <p style={{ fontSize: 11, color: "#854d0e", margin: "6px 0 0", fontWeight: 700, textAlign: "center" }}>{item.content}</p>
+          </div>
+        );
+      case "emoji":
+        return (
+          <div key={item.id} style={{ width: "100%", height: h, display: "flex", alignItems: "center", justifyContent: "center", border: "3px solid #1a2744", borderRadius: 4 }}>
+            <span style={{ fontSize: 48 }}>{item.content}</span>
+          </div>
+        );
+      case "greeting":
+        return (
+          <div key={item.id} style={{
+            width: "100%", height: h, borderRadius: 6, backgroundColor: "#fff0f6",
+            border: "3px solid #f9a8d4", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", padding: 12,
+          }}>
+            <span style={{ fontSize: 30 }}>💌</span>
+            <p style={{ fontSize: 11, color: "#9d174d", margin: "6px 0 0", fontWeight: 600, textAlign: "center" }}>{item.content}</p>
+          </div>
+        );
+      case "money":
+        return (
+          <div key={item.id} style={{
+            width: "100%", height: h, borderRadius: 6, backgroundColor: "#f0fdf4",
+            border: "3px solid #86efac", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center", padding: 12,
+          }}>
+            <span style={{ fontSize: 30 }}>💰</span>
+            <p style={{ fontSize: 11, color: "#166534", margin: "6px 0 0", fontWeight: 600, textAlign: "center" }}>{item.content}</p>
+          </div>
+        );
+      case "voice":
+        return (
+          <div key={item.id} style={{
+            width: "100%", height: h, borderRadius: 6, backgroundColor: "#eef2fb",
+            border: "3px solid #1a2744", display: "flex", alignItems: "center", justifyContent: "center", padding: 12,
+          }}>
+            <p style={{ fontSize: 11, color: "#394460", margin: 0 }}>{item.content}</p>
           </div>
         );
       default:
@@ -365,7 +359,147 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     }
   };
 
-  const currentPageItems = pages[currentPage] || [];
+  // Ring binder component
+  const RingBinder = ({ height }: { height: number }) => {
+    const ringCount = 4;
+    const spacing = height / (ringCount + 1);
+    return (
+      <div style={{
+        width: 28, height: "100%", position: "relative",
+        background: "linear-gradient(90deg, #c9a84c 0%, #e8c86a 30%, #f5dea0 50%, #e8c86a 70%, #c9a84c 100%)",
+        boxShadow: "0 0 8px rgba(0,0,0,0.3)",
+        flexShrink: 0,
+      }}>
+        {Array.from({ length: ringCount }).map((_, i) => (
+          <div key={i} style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            top: spacing * (i + 1) - 12,
+            width: 20, height: 24, borderRadius: "50%",
+            border: "3px solid #b8962e",
+            background: "linear-gradient(180deg, #f5dea0 0%, #c9a84c 100%)",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.4)",
+          }} />
+        ))}
+      </div>
+    );
+  };
+
+  // Fullscreen landscape scrapbook viewer
+  const renderScrapbookOverlay = () => {
+    if (!viewingScrapbook) return null;
+    const spread = spreads[currentSpread];
+    if (!spread) return null;
+
+    return (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+        backgroundColor: "#d4c9b0",
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Close button */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "rgba(0,0,0,0.15)" }}>
+          <button onClick={() => setViewingScrapbook(false)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <X size={18} color="#fff" />
+            <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Close</span>
+          </button>
+          <span style={{ fontSize: 11, color: "#fff", fontWeight: 600 }}>
+            {currentSpread + 1} / {totalSpreads}
+          </span>
+        </div>
+
+        {/* Book spread */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 8 }}>
+          <div style={{
+            width: "100%", maxWidth: 900, height: "100%", maxHeight: 500,
+            display: "flex", borderRadius: 8, overflow: "hidden",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
+            position: "relative",
+          }}>
+            {/* Left page */}
+            <div style={{
+              flex: 1, padding: 10, display: "flex", flexDirection: "column", gap: 6,
+              justifyContent: spread.left.length === 1 ? "center" : "space-between",
+              background: "linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 50%, #f0ebe0 100%)",
+              backgroundImage: `linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 50%, #f0ebe0 100%)`,
+              position: "relative",
+            }}>
+              {/* Paper texture dots */}
+              <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "8px 8px" }} />
+              {/* Lace edge left */}
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "repeating-linear-gradient(180deg, transparent, transparent 6px, rgba(255,255,255,0.6) 6px, rgba(255,255,255,0.6) 8px)" }} />
+              <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", gap: 6, justifyContent: spread.left.length === 1 ? "stretch" : "space-between" }}>
+                {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
+              </div>
+            </div>
+
+            {/* Ring binder */}
+            <RingBinder height={500} />
+
+            {/* Right page */}
+            <div style={{
+              flex: 1, padding: 10, display: "flex", flexDirection: "column", gap: 6,
+              justifyContent: spread.right.length === 1 ? "center" : "space-between",
+              background: "linear-gradient(225deg, #f5f0e8 0%, #e8e0d0 50%, #f0ebe0 100%)",
+              position: "relative",
+            }}>
+              <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "8px 8px" }} />
+              <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", gap: 6, justifyContent: spread.right.length === 1 ? "stretch" : "space-between" }}>
+                {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.3 }}>
+                    <span style={{ fontSize: 13, color: "#8a7e6a", fontStyle: "italic" }}>Empty page</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation arrows */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, padding: "8px 0 12px" }}>
+          <button onClick={goPrev} disabled={currentSpread === 0} style={{
+            width: 40, height: 40, borderRadius: "50%", border: "none", cursor: currentSpread === 0 ? "default" : "pointer",
+            backgroundColor: currentSpread === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}>
+            <ChevronLeft size={22} color={currentSpread === 0 ? "#999" : "#333"} />
+          </button>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#5a4e3a" }}>
+            Page {currentSpread + 1} of {totalSpreads}
+          </span>
+          <button onClick={goNext} disabled={currentSpread >= totalSpreads - 1} style={{
+            width: 40, height: 40, borderRadius: "50%", border: "none", cursor: currentSpread >= totalSpreads - 1 ? "default" : "pointer",
+            backgroundColor: currentSpread >= totalSpreads - 1 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}>
+            <ChevronRight size={22} color={currentSpread >= totalSpreads - 1 ? "#999" : "#333"} />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Fullscreen video player
+  const renderVideoPlayer = () => {
+    if (!playingVideo) return null;
+    return (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 10000,
+        backgroundColor: "#000", display: "flex", flexDirection: "column",
+      }}>
+        <div style={{ padding: "8px 12px" }}>
+          <button onClick={() => setPlayingVideo(null)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+            <X size={20} color="#fff" />
+            <span style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>Close</span>
+          </button>
+        </div>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <video src={playingVideo} controls autoPlay style={{ width: "100%", height: "100%", maxHeight: "80vh", objectFit: "contain" }} />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
@@ -420,7 +554,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* Cover with change */}
+      {/* Cover */}
       <div style={{ width: "100%", height: 70, borderRadius: 8, overflow: "hidden", marginBottom: 4, position: "relative" }}>
         <img src={album.image} alt={title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "3px 6px", background: "linear-gradient(transparent, rgba(0,0,0,0.5))" }}>
@@ -448,22 +582,10 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <>
               <p style={{ fontSize: 8, fontWeight: 700, color: "#394460", marginBottom: 4 }}>Choose cover</p>
               <div className="flex flex-col" style={{ gap: 2 }}>
-                <button onClick={() => coverInputRef.current?.click()} style={{
-                  width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#8fa9dd", color: "#fff",
-                  fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer",
-                }}>📁 From device</button>
-                <button onClick={() => cameraInputRef.current?.click()} style={{
-                  width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#7b9ed4", color: "#fff",
-                  fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer",
-                }}>📷 From camera roll</button>
-                <button onClick={() => setCoverPickerSource("folders")} style={{
-                  width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#e8ecf4", color: "#394460",
-                  fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer",
-                }}>📂 From a folder</button>
-                <button onClick={() => setCoverPickerSource("albums")} style={{
-                  width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#e8ecf4", color: "#394460",
-                  fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer",
-                }}>📒 From an album</button>
+                <button onClick={() => coverInputRef.current?.click()} style={{ width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#8fa9dd", color: "#fff", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>📁 From device</button>
+                <button onClick={() => cameraInputRef.current?.click()} style={{ width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#7b9ed4", color: "#fff", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>📷 From camera roll</button>
+                <button onClick={() => setCoverPickerSource("folders")} style={{ width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>📂 From a folder</button>
+                <button onClick={() => setCoverPickerSource("albums")} style={{ width: "100%", padding: "5px", borderRadius: 5, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 8, fontWeight: 600, border: "none", cursor: "pointer" }}>📒 From an album</button>
               </div>
               {photos.length > 0 && (
                 <>
@@ -483,9 +605,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           {coverPickerSource === "folders" && (
             <>
               <div className="flex items-center" style={{ marginBottom: 4, gap: 3 }}>
-                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}>
-                  <ChevronLeft size={11} color="#394460" />
-                </button>
+                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}><ChevronLeft size={11} color="#394460" /></button>
                 <p style={{ fontSize: 8, fontWeight: 700, color: "#394460", margin: 0 }}>Pick from a folder</p>
               </div>
               {folders.filter((f) => f.photos.length > 0).map((f) => (
@@ -501,17 +621,13 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
                   </div>
                 </div>
               ))}
-              {folders.filter((f) => f.photos.length > 0).length === 0 && (
-                <p style={{ fontSize: 7, color: "#a0a8b8", textAlign: "center", padding: "8px 0" }}>No folders with photos</p>
-              )}
+              {folders.filter((f) => f.photos.length > 0).length === 0 && <p style={{ fontSize: 7, color: "#a0a8b8", textAlign: "center", padding: "8px 0" }}>No folders with photos</p>}
             </>
           )}
           {coverPickerSource === "albums" && (
             <>
               <div className="flex items-center" style={{ marginBottom: 4, gap: 3 }}>
-                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}>
-                  <ChevronLeft size={11} color="#394460" />
-                </button>
+                <button onClick={() => setCoverPickerSource("main")} style={{ background: "none", border: "none", cursor: "pointer" }}><ChevronLeft size={11} color="#394460" /></button>
                 <p style={{ fontSize: 8, fontWeight: 700, color: "#394460", margin: 0 }}>Pick from an album</p>
               </div>
               {albums.filter((a) => a.photos.length > 0).map((a) => (
@@ -527,18 +643,14 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
                   </div>
                 </div>
               ))}
-              {albums.filter((a) => a.photos.length > 0).length === 0 && (
-                <p style={{ fontSize: 7, color: "#a0a8b8", textAlign: "center", padding: "8px 0" }}>No albums with photos</p>
-              )}
+              {albums.filter((a) => a.photos.length > 0).length === 0 && <p style={{ fontSize: 7, color: "#a0a8b8", textAlign: "center", padding: "8px 0" }}>No albums with photos</p>}
             </>
           )}
-          <button onClick={() => { setShowCoverPicker(false); setCoverPickerSource("main"); }} style={{
-            width: "100%", padding: "3px", fontSize: 7, color: "#687287", background: "none", border: "none", cursor: "pointer", marginTop: 3,
-          }}>Cancel</button>
+          <button onClick={() => { setShowCoverPicker(false); setCoverPickerSource("main"); }} style={{ width: "100%", padding: "3px", fontSize: 7, color: "#687287", background: "none", border: "none", cursor: "pointer", marginTop: 3 }}>Cancel</button>
         </div>
       )}
 
-      {/* ── Toolbar: Row 1 (5 items) ── */}
+      {/* Toolbar Row 1 */}
       <div className="flex items-center justify-between" style={{ marginBottom: 3, padding: "3px 0" }}>
         {[
           { icon: <ImageIcon size={11} color="#687287" />, label: "Photo", action: handleAddPhotos },
@@ -547,16 +659,14 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <Video size={11} color="#687287" />, label: "Video", action: handleAddVideo },
           { icon: <span style={{ fontSize: 12 }}>🎞️</span>, label: "GIF", action: () => setShowGifPicker(!showGifPicker) },
         ].map((btn) => (
-          <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
-            background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1,
-          }}>
+          <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1 }}>
             {btn.icon}
             <span style={{ fontSize: 6, color: "#687287", marginTop: 1 }}>{btn.label}</span>
           </button>
         ))}
       </div>
 
-      {/* ── Toolbar: Row 2 (5 items) ── */}
+      {/* Toolbar Row 2 */}
       <div className="flex items-center justify-between" style={{ marginBottom: 4, padding: "3px 0" }}>
         {[
           { icon: <Smile size={11} color="#687287" />, label: "Emoji", action: () => setShowEmojiPicker(!showEmojiPicker) },
@@ -565,9 +675,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           { icon: <DollarSign size={11} color="#687287" />, label: "Money", action: () => { setExtraItems((prev) => [...prev, { type: "money", content: "💰 Money Gift", id: `money-${Date.now()}` }]); toast.success("Money gift added!"); } },
           { icon: <Ticket size={11} color="#687287" />, label: "Voucher", action: () => { setExtraItems((prev) => [...prev, { type: "voucher", content: "🎟️ Gift Voucher", id: `voucher-${Date.now()}` }]); toast.success("Voucher added!"); } },
         ].map((btn) => (
-          <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{
-            background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1,
-          }}>
+          <button key={btn.label} onClick={btn.action} className="flex flex-col items-center" style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 2px", borderRadius: 4, flex: 1 }}>
             {btn.icon}
             <span style={{ fontSize: 6, color: isRecording && btn.label.includes("s") ? "#ef4444" : "#687287", marginTop: 1 }}>{btn.label}</span>
           </button>
@@ -596,26 +704,16 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
 
       {/* Emoji picker */}
       {showEmojiPicker && (
-        <div style={{
-          backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 4,
-          marginBottom: 4, display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 1,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        }}>
+        <div style={{ backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 4, marginBottom: 4, display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 1, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
           {EMOJI_LIST.map((emoji) => (
-            <button key={emoji} onClick={() => handleAddEmoji(emoji)} style={{
-              background: "none", border: "none", cursor: "pointer", fontSize: 12, padding: 1, borderRadius: 3,
-            }}>{emoji}</button>
+            <button key={emoji} onClick={() => handleAddEmoji(emoji)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, padding: 1, borderRadius: 3 }}>{emoji}</button>
           ))}
         </div>
       )}
 
       {/* GIF picker */}
       {showGifPicker && (
-        <div style={{
-          backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 4,
-          marginBottom: 4, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        }}>
+        <div style={{ backgroundColor: "#fff", border: "1px solid #dde3f0", borderRadius: 8, padding: 4, marginBottom: 4, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
           {GIF_LIST.map((gif, i) => (
             <div key={i} onClick={() => handleAddGif(gif)} style={{ borderRadius: 4, overflow: "hidden", cursor: "pointer", aspectRatio: "1" }}>
               <img src={gif} alt="GIF" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -624,49 +722,70 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* ── Album Page View (Scrapbook) ── */}
-      <div style={{
-        backgroundColor: "#faf8f5", borderRadius: 10, border: "2px solid #e8e2d8",
-        minHeight: 200, position: "relative", padding: "12px 14px",
-        boxShadow: "inset 0 2px 6px rgba(0,0,0,0.06), 3px 3px 12px rgba(0,0,0,0.1)",
-        backgroundImage: "linear-gradient(90deg, transparent 49.5%, rgba(0,0,0,0.04) 49.5%, rgba(0,0,0,0.04) 50.5%, transparent 50.5%)",
+      {/* Open Album Book button */}
+      <button onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
+        width: "100%", padding: "10px", borderRadius: 10, border: "2px solid #c9a84c",
+        backgroundColor: "#faf8f0", cursor: "pointer", marginBottom: 6,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+        background: "linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 100%)",
       }}>
-        {/* Page corner fold effect */}
-        <div style={{
-          position: "absolute", top: 0, right: 0, width: 16, height: 16,
-          background: "linear-gradient(135deg, #faf8f5 50%, #e8e2d8 50%)",
-          borderRadius: "0 10px 0 0",
-        }} />
-
-        {totalPages === 0 || (currentPageItems.length === 0 && photos.length === 0) ? (
-          <div className="flex flex-col items-center justify-center" style={{ minHeight: 170 }}>
-            <ImageIcon size={24} color="#c0c8d8" style={{ marginBottom: 6 }} />
-            <span style={{ fontSize: 10, color: "#8fa9dd", fontWeight: 600 }}>Empty album</span>
-            <span style={{ fontSize: 8, color: "#a0a8b8" }}>Add photos, notes, GIFs using the toolbar above</span>
-          </div>
-        ) : (
-          <div style={{ minHeight: 170 }}>
-            {currentPageItems.map((item) => renderPageItem(item, currentPageItems.length === 1))}
-          </div>
-        )}
-
-        {/* Page navigation */}
-        <div className="flex items-center justify-between" style={{ marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-          <button onClick={goPrev} disabled={currentPage === 0} style={{
-            background: "none", border: "none", cursor: currentPage === 0 ? "default" : "pointer", opacity: currentPage === 0 ? 0.3 : 1,
-            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage === 0 ? "transparent" : "#e8ecf4",
-          }}>
-            <ChevronLeft size={16} color="#687287" />
-          </button>
-          <span style={{ fontSize: 8, color: "#a0a8b8", fontWeight: 600 }}>Page {currentPage + 1} / {Math.max(1, totalPages)}</span>
-          <button onClick={goNext} disabled={currentPage >= totalPages - 1} style={{
-            background: "none", border: "none", cursor: currentPage >= totalPages - 1 ? "default" : "pointer", opacity: currentPage >= totalPages - 1 ? 0.3 : 1,
-            padding: "2px 6px", borderRadius: 6, backgroundColor: currentPage >= totalPages - 1 ? "transparent" : "#e8ecf4",
-          }}>
-            <ChevronRight size={16} color="#687287" />
-          </button>
+        <span style={{ fontSize: 20 }}>📖</span>
+        <div style={{ textAlign: "left" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#5a4e3a", margin: 0 }}>Open Album Book</p>
+          <p style={{ fontSize: 7, color: "#8a7e6a", margin: "1px 0 0" }}>
+            {totalSpreads} page{totalSpreads !== 1 ? "s" : ""} · Rotate phone to landscape 📱↔️
+          </p>
         </div>
-      </div>
+      </button>
+
+      {/* Mini preview of current spread */}
+      {totalSpreads > 0 && (
+        <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
+          width: "100%", height: 80, borderRadius: 8, overflow: "hidden", cursor: "pointer",
+          display: "flex", border: "2px solid #d4c9b0", backgroundColor: "#ebe4d6",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}>
+          {/* Mini left */}
+          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+            {(spreads[0]?.left || []).slice(0, 2).map((item) => (
+              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
+                {item.type === "photo" ? (
+                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                ) : (
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>
+                    {item.type === "note" ? "📝" : item.type === "gif" ? "🎞️" : "📄"}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Mini binder */}
+          <div style={{ width: 10, background: "linear-gradient(90deg, #c9a84c, #f5dea0, #c9a84c)", flexShrink: 0 }} />
+          {/* Mini right */}
+          <div style={{ flex: 1, padding: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+            {(spreads[0]?.right || []).slice(0, 2).map((item) => (
+              <div key={item.id} style={{ flex: 1, borderRadius: 3, overflow: "hidden", border: "1px solid #1a2744" }}>
+                {item.type === "photo" ? (
+                  <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                ) : item.type === "video" ? (
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000" }}>
+                    <Play size={10} color="#fff" />
+                  </div>
+                ) : (
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, color: "#5a4e3a", backgroundColor: "#fffdf0" }}>📄</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen scrapbook overlay */}
+      {renderScrapbookOverlay()}
+
+      {/* Fullscreen video player */}
+      {renderVideoPlayer()}
 
       {/* Share sheet */}
       {showShareSheet && (
@@ -678,25 +797,12 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
                 <ChevronLeft size={14} color="#394460" />
               </button>
               <p style={{ fontSize: 10, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
-              <span style={{ fontSize: 8, color: "#687287", marginLeft: "auto" }}>SmartMemory App</span>
             </div>
             <div className="flex flex-col" style={{ gap: 4 }}>
-              <button onClick={() => handleShare("album")}
-                style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
-                📒 Share Album "{title}"
-              </button>
-              <button onClick={() => handleShare("folder")}
-                style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
-                📁 Share Folder
-              </button>
-              <button onClick={() => handleShare("photos")}
-                style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
-                🖼️ Share Selected Photos
-              </button>
-              <button onClick={() => setShowShareSheet(false)}
-                style={{ width: "100%", padding: "5px", fontSize: 8, color: "#687287", background: "none", border: "none", cursor: "pointer" }}>
-                Cancel
-              </button>
+              <button onClick={() => handleShare("album")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📒 Share Album "{title}"</button>
+              <button onClick={() => handleShare("folder")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📁 Share Folder</button>
+              <button onClick={() => handleShare("photos")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>🖼️ Share Selected Photos</button>
+              <button onClick={() => setShowShareSheet(false)} style={{ width: "100%", padding: "5px", fontSize: 8, color: "#687287", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
         </div>
