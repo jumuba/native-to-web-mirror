@@ -408,7 +408,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
             <div style={{
               position: "absolute",
               top: "8%", bottom: "8%",
-              left: "8%", width: "38%",
+              left: "10%", width: "36%",
               display: "flex", flexDirection: "column", gap: 6, padding: 8,
               justifyContent: spread.left.length === 1 ? "stretch" : "space-between",
             }}>
