@@ -31,8 +31,8 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>(() => loadFromStorage("folders", mockFolders));
   const [albums, setAlbums] = useState<Album[]>(() => loadFromStorage("albums", mockAlbums));
 
-  useEffect(() => { localStorage.setItem("folders", JSON.stringify(folders)); }, [folders]);
-  useEffect(() => { localStorage.setItem("albums", JSON.stringify(albums)); }, [albums]);
+  useEffect(() => { try { localStorage.setItem("folders", JSON.stringify(folders)); } catch (e) { console.warn("localStorage full, folders not saved"); } }, [folders]);
+  useEffect(() => { try { localStorage.setItem("albums", JSON.stringify(albums)); } catch (e) { console.warn("localStorage full, albums not saved"); } }, [albums]);
 
   const createFolder = useCallback((data: { name: string; color: string; font: string; hasPassword: boolean; isPrivate: boolean }) => {
     const newFolder: Folder = {
