@@ -399,7 +399,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 4 }}>
           <div style={{
             width: "100%", height: "100%", position: "relative",
-            backgroundImage: "url(/images/album-bg.png)",
+            backgroundImage: "url(/images/album-bg-clean.png)",
             backgroundSize: "100% 100%",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
