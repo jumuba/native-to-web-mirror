@@ -481,12 +481,14 @@ function EditorOverlay({
               }}
             >
               <div
-                className="flex items-center justify-center flex-shrink-0"
+                className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                onClick={() => setActiveFrame(null)}
                 style={{
                   width: 48,
                   height: 48,
                   borderRadius: 8,
                   backgroundColor: "#2a2a2a",
+                  border: activeFrame === null ? "2px solid #1db954" : "none",
                 }}
               >
                 <X size={16} color="#888" />
@@ -494,13 +496,14 @@ function EditorOverlay({
               {["🐰", "🎨", "🎂", "⭐", "🌸", "🎭"].map((emoji, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-center flex-shrink-0"
+                  className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                  onClick={() => setActiveFrame(i)}
                   style={{
                     width: 48,
                     height: 48,
                     borderRadius: 8,
                     backgroundColor: "#2a2a2a",
-                    border: "2px solid #444",
+                    border: activeFrame === i ? "2px solid #1db954" : "2px solid #444",
                     fontSize: 20,
                   }}
                 >
