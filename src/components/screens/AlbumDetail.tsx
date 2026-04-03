@@ -242,17 +242,9 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
 
   // Resizable photo item component
   const ResizablePhoto = ({ item, h }: { item: PageItem; h: string }) => {
-    const [scale, setScale] = useState(100); // percentage
     return (
       <div key={item.id} style={{ width: "100%", height: h, borderRadius: 0, overflow: "hidden", position: "relative" }}>
-        <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transform: `scale(${scale / 100})`, transformOrigin: "center center", transition: "transform 0.15s ease" }} />
-        <input
-          type="range" min={50} max={200} value={scale}
-          onChange={(e) => setScale(Number(e.target.value))}
-          onClick={(e) => e.stopPropagation()}
-          style={{ position: "absolute", bottom: 4, left: "10%", width: "80%", height: 14, opacity: 0.8, cursor: "pointer", zIndex: 5 }}
-          title={`Size: ${scale}%`}
-        />
+        <img src={item.content} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       </div>
     );
   };
