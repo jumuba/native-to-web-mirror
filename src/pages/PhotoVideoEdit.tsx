@@ -306,8 +306,13 @@ function EditorOverlay({
               {beautifyItems.map((item, i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center flex-shrink-0"
+                  className="flex flex-col items-center flex-shrink-0 cursor-pointer"
                   style={{ width: 48 }}
+                  onClick={() => {
+                    if (item.label === "Reset") {
+                      setBrightness(100); setContrast(100); setSaturate(100); setActiveFilter(null);
+                    }
+                  }}
                 >
                   <div
                     className="flex items-center justify-center"
@@ -315,10 +320,9 @@ function EditorOverlay({
                       width: 32,
                       height: 32,
                       borderRadius: 16,
-                      backgroundColor: i === 1 ? "#333" : "#2a2a2a",
+                      backgroundColor: "#2a2a2a",
                       marginBottom: 3,
                       color: "#ccc",
-                      border: i === 1 ? "1.5px solid #1db954" : "none",
                     }}
                   >
                     {item.icon}
@@ -326,7 +330,7 @@ function EditorOverlay({
                   <span
                     style={{
                       fontSize: 7.5,
-                      color: i === 1 ? "#1db954" : "#888",
+                      color: "#888",
                       textAlign: "center",
                       lineHeight: "9px",
                       fontWeight: 500,
