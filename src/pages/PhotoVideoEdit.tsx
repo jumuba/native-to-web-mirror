@@ -111,14 +111,30 @@ function FeatureIcon({ icon, label }: { icon: React.ReactNode; label: string }) 
 function EditorOverlay({
   mode,
   onClose,
+  imageUrl,
 }: {
   mode: "camera" | "photo";
   onClose: () => void;
+  imageUrl: string | null;
 }) {
   const [activeTab, setActiveTab] = useState<EditorTab>("beautify");
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturate, setSaturate] = useState(100);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeFrame, setActiveFrame] = useState<number | null>(null);
   const isCamera = mode === "camera";
   const modeLabel = isCamera ? "Camera" : "Photo Edit";
   const ModeIcon = isCamera ? Camera : ImageIcon;
+
+  const filterStyle = (): React.CSSProperties => ({
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%)${activeFilter ? ` ${activeFilter}` : ""}`,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover" as const,
+    display: "block",
+    borderRadius: 8,
+  });
 
   return (
     <div
