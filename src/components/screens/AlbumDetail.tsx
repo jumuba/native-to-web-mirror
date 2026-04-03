@@ -359,32 +359,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     }
   };
 
-  // Ring binder component
-  const RingBinder = ({ height }: { height: number }) => {
-    const ringCount = 4;
-    const spacing = height / (ringCount + 1);
-    return (
-      <div style={{
-        width: 28, height: "100%", position: "relative",
-        background: "linear-gradient(90deg, #c9a84c 0%, #e8c86a 30%, #f5dea0 50%, #e8c86a 70%, #c9a84c 100%)",
-        boxShadow: "0 0 8px rgba(0,0,0,0.3)",
-        flexShrink: 0,
-      }}>
-        {Array.from({ length: ringCount }).map((_, i) => (
-          <div key={i} style={{
-            position: "absolute", left: "50%", transform: "translateX(-50%)",
-            top: spacing * (i + 1) - 12,
-            width: 20, height: 24, borderRadius: "50%",
-            border: "3px solid #b8962e",
-            background: "linear-gradient(180deg, #f5dea0 0%, #c9a84c 100%)",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.4)",
-          }} />
-        ))}
-      </div>
-    );
-  };
-
-  // Fullscreen landscape scrapbook viewer
+  // Fullscreen landscape scrapbook viewer using real album background
   const renderScrapbookOverlay = () => {
     if (!viewingScrapbook) return null;
     const spread = spreads[currentSpread];
@@ -393,11 +368,11 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     return (
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
-        backgroundColor: "#d4c9b0",
+        backgroundColor: "#e8ddd0",
         display: "flex", flexDirection: "column",
       }}>
-        {/* Close button */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "rgba(0,0,0,0.15)" }}>
+        {/* Close + page indicator */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "rgba(0,0,0,0.25)" }}>
           <button onClick={() => setViewingScrapbook(false)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
             <X size={18} color="#fff" />
             <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Close</span>
@@ -407,55 +382,45 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           </span>
         </div>
 
-        {/* Book spread */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 8 }}>
+        {/* Book spread with real background image */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 4 }}>
           <div style={{
-            width: "100%", maxWidth: 900, height: "100%", maxHeight: 500,
-            display: "flex", borderRadius: 8, overflow: "hidden",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.4)",
-            position: "relative",
+            width: "100%", height: "100%", position: "relative",
+            backgroundImage: "url(/images/album-bg.png)",
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
           }}>
-            {/* Left page */}
+            {/* Left page content area — positioned over the left white area of the background */}
             <div style={{
-              flex: 1, padding: 10, display: "flex", flexDirection: "column", gap: 6,
-              justifyContent: spread.left.length === 1 ? "center" : "space-between",
-              background: "linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 50%, #f0ebe0 100%)",
-              backgroundImage: `linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 50%, #f0ebe0 100%)`,
-              position: "relative",
+              position: "absolute",
+              top: "8%", bottom: "8%",
+              left: "5%", width: "40%",
+              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              justifyContent: spread.left.length === 1 ? "stretch" : "space-between",
             }}>
-              {/* Paper texture dots */}
-              <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "8px 8px" }} />
-              {/* Lace edge left */}
-              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "repeating-linear-gradient(180deg, transparent, transparent 6px, rgba(255,255,255,0.6) 6px, rgba(255,255,255,0.6) 8px)" }} />
-              <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", gap: 6, justifyContent: spread.left.length === 1 ? "stretch" : "space-between" }}>
-                {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
-              </div>
+              {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
             </div>
 
-            {/* Ring binder */}
-            <RingBinder height={500} />
-
-            {/* Right page */}
+            {/* Right page content area — positioned over the right white area */}
             <div style={{
-              flex: 1, padding: 10, display: "flex", flexDirection: "column", gap: 6,
-              justifyContent: spread.right.length === 1 ? "center" : "space-between",
-              background: "linear-gradient(225deg, #f5f0e8 0%, #e8e0d0 50%, #f0ebe0 100%)",
-              position: "relative",
+              position: "absolute",
+              top: "8%", bottom: "8%",
+              right: "3%", width: "40%",
+              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              justifyContent: spread.right.length === 1 ? "stretch" : "space-between",
             }}>
-              <div style={{ position: "absolute", inset: 0, opacity: 0.03, backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "8px 8px" }} />
-              <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", gap: 6, justifyContent: spread.right.length === 1 ? "stretch" : "space-between" }}>
-                {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
-                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.3 }}>
-                    <span style={{ fontSize: 13, color: "#8a7e6a", fontStyle: "italic" }}>Empty page</span>
-                  </div>
-                )}
-              </div>
+              {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.3 }}>
+                  <span style={{ fontSize: 13, color: "#8a7e6a", fontStyle: "italic" }}>Empty page</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Navigation arrows */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, padding: "8px 0 12px" }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, padding: "6px 0 10px" }}>
           <button onClick={goPrev} disabled={currentSpread === 0} style={{
             width: 40, height: 40, borderRadius: "50%", border: "none", cursor: currentSpread === 0 ? "default" : "pointer",
             backgroundColor: currentSpread === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)",
