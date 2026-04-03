@@ -392,32 +392,43 @@ function EditorOverlay({
               }}
             >
               <div
-                className="flex items-center justify-center flex-shrink-0"
+                className="flex items-center justify-center flex-shrink-0 cursor-pointer"
+                onClick={() => setActiveFilter(null)}
                 style={{
                   width: 48,
                   height: 48,
                   borderRadius: 8,
                   backgroundColor: "#2a2a2a",
+                  border: activeFilter === null ? "2px solid #1db954" : "none",
                 }}
               >
                 <X size={16} color="#888" />
               </div>
-              {previewColors.map((color, i) => (
+              {[
+                { name: "Gentle", filter: "sepia(30%) brightness(105%)" },
+                { name: "Cool", filter: "hue-rotate(180deg) saturate(80%)" },
+                { name: "Retro", filter: "sepia(60%) contrast(90%)" },
+                { name: "Forest", filter: "hue-rotate(90deg) saturate(120%)" },
+                { name: "Fresh", filter: "brightness(110%) saturate(130%)" },
+                { name: "Warm", filter: "sepia(20%) saturate(140%) brightness(105%)" },
+              ].map((effect, i) => (
                 <div
                   key={i}
-                  className="flex flex-col items-center flex-shrink-0"
+                  className="flex flex-col items-center flex-shrink-0 cursor-pointer"
+                  onClick={() => setActiveFilter(effect.filter)}
                 >
                   <div
                     style={{
                       width: 48,
                       height: 48,
                       borderRadius: 8,
-                      background: `linear-gradient(135deg, ${color}, ${color}88)`,
+                      background: `linear-gradient(135deg, ${previewColors[i]}, ${previewColors[i]}88)`,
                       marginBottom: 3,
+                      border: activeFilter === effect.filter ? "2px solid #1db954" : "none",
                     }}
                   />
-                  <span style={{ fontSize: 7, color: "#888" }}>
-                    {["Gentle", "Cool", "Retro", "Forest", "Fresh", "Warm"][i]}
+                  <span style={{ fontSize: 7, color: activeFilter === effect.filter ? "#1db954" : "#888" }}>
+                    {effect.name}
                   </span>
                 </div>
               ))}
