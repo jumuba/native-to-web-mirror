@@ -395,32 +395,27 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           </span>
         </div>
 
-        {/* Book spread with real background image */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 4 }}>
+        {/* Book spread — plain album-colored pages, no background image */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 8 }}>
           <div style={{
-            width: "100%", height: "100%", position: "relative",
-            backgroundImage: "url(/images/album-bg.png)",
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
+            width: "100%", height: "100%", display: "flex", gap: 4,
+            borderRadius: 8, overflow: "hidden",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
           }}>
-            {/* Left page content area — positioned over the left white area of the background */}
+            {/* Left page */}
             <div style={{
-              position: "absolute",
-              top: "8%", bottom: "8%",
-              left: "5%", width: "40%",
-              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              flex: 1, backgroundColor: album.theme === "dark" ? "#2c2c2c" : album.theme === "vintage" ? "#f5e6d3" : album.theme === "modern" ? "#f0f0f0" : "#fffef7",
+              display: "flex", flexDirection: "column", gap: 6, padding: 10,
               justifyContent: spread.left.length === 1 ? "stretch" : "space-between",
+              borderRight: "1px solid rgba(0,0,0,0.1)",
             }}>
               {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
             </div>
 
-            {/* Right page content area — positioned over the right white area */}
+            {/* Right page */}
             <div style={{
-              position: "absolute",
-              top: "8%", bottom: "8%",
-              right: "3%", width: "40%",
-              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              flex: 1, backgroundColor: album.theme === "dark" ? "#2c2c2c" : album.theme === "vintage" ? "#f5e6d3" : album.theme === "modern" ? "#f0f0f0" : "#fffef7",
+              display: "flex", flexDirection: "column", gap: 6, padding: 10,
               justifyContent: spread.right.length === 1 ? "stretch" : "space-between",
             }}>
               {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
