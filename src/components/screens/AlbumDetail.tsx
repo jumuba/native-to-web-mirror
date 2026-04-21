@@ -27,6 +27,9 @@ type PageItem = {
 };
 
 type Spread = { left: PageItem[]; right: PageItem[] };
+type ShareTarget = "album";
+type ShareVisibility = "private" | "public";
+type ShareChannel = "whatsapp" | "email" | "facebook" | "copy";
 
 const EMOJI_LIST = ["❤️", "😍", "🎉", "🥳", "🎂", "🌟", "💐", "🎶", "😂", "🥰", "👏", "🙌", "💕", "✨", "🎁", "🌺", "😊", "🤗", "💖", "🔥", "👶", "💒", "🎵", "🌈"];
 
@@ -123,6 +126,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [title, setTitle] = useState(album.title);
   const [showMenu, setShowMenu] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [shareTarget, setShareTarget] = useState<ShareTarget>("album");
+  const [selectedShareChannel, setSelectedShareChannel] = useState<ShareChannel | null>(null);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
   const [coverPickerSource, setCoverPickerSource] = useState<"main" | "folders" | "albums">("main");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -233,11 +238,54 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     mediaRecorderRef.current?.stop(); setIsRecording(false);
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
   };
-  const handleShare = async (type: "album" | "folder" | "photos") => {
-    if (navigator.share) {
-      try { await navigator.share({ title: `Album: ${title}`, text: `Check out this album!`, url: window.location.href }); } catch {}
-    } else { await navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }
+  const buildSharePayload = (target: ShareTarget, visibility: ShareVisibility) => {
+    const shareTitle = `Album: ${title}`;
+    const shareText = visibility === "private"
+      ? `Private share: album "${title}" from SmartMemory App.`
+      : `Public share: album "${title}" from SmartMemory App.`;
+    const params = new URLSearchParams({
+      shareType: target,
+      visibility,
+      albumId: album.id,
+    });
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+    return { shareTitle, shareText, shareUrl };
+  };
+
+  const handleShare = async (channel: ShareChannel, visibility: ShareVisibility) => {
+    const { shareTitle, shareText, shareUrl } = buildSharePayload(shareTarget, visibility);
+
+    if (channel === "copy") {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied!");
+      setShowShareSheet(false);
+      setSelectedShareChannel(null);
+      return;
+    }
+
+    const encodedText = encodeURIComponent(`${shareText} ${shareUrl}`);
+    const encodedTitle = encodeURIComponent(shareTitle);
+    const encodedBody = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+
+    const channelUrls: Record<Exclude<ShareChannel, "native" | "copy">, string> = {
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+      email: `mailto:?subject=${encodedTitle}&body=${encodedBody}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    };
+
+    window.open(channelUrls[channel], "_blank", "noopener,noreferrer");
+    toast.success("Share window opened");
     setShowShareSheet(false);
+    setSelectedShareChannel(null);
+  };
+
+  const getChannelLabel = (channel: ShareChannel | null) => {
+    if (channel === "whatsapp") return "WhatsApp";
+    if (channel === "email") return "Email";
+    if (channel === "facebook") return "Facebook";
+    if (channel === "copy") return "Copy Link";
+    return "";
   };
 
   // Resizable photo item component
@@ -726,19 +774,29 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       {/* Share sheet */}
       {showShareSheet && (
         <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 20, borderRadius: 38, overflow: "hidden" }}>
-          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => setShowShareSheet(false)} />
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} />
           <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "12px 12px 0 0", padding: "10px 12px 16px" }}>
             <div className="flex items-center" style={{ marginBottom: 6, gap: 6 }}>
-              <button onClick={() => setShowShareSheet(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
+              <button onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
                 <ChevronLeft size={14} color="#394460" />
               </button>
               <p style={{ fontSize: 10, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
             </div>
             <div className="flex flex-col" style={{ gap: 4 }}>
-              <button onClick={() => handleShare("album")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📒 Share Album "{title}"</button>
-              <button onClick={() => handleShare("folder")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📁 Share Folder</button>
-              <button onClick={() => handleShare("photos")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>🖼️ Share Selected Photos</button>
-              <button onClick={() => setShowShareSheet(false)} style={{ width: "100%", padding: "5px", fontSize: 8, color: "#687287", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => setShareTarget("album")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📒 Share Album "{title}"</button>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                <button onClick={() => setSelectedShareChannel("whatsapp")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#25D366", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>WhatsApp</button>
+                <button onClick={() => setSelectedShareChannel("email")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Email</button>
+                <button onClick={() => setSelectedShareChannel("facebook")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#1877F2", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Facebook</button>
+                <button onClick={() => setSelectedShareChannel("copy")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#dfe6f2", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Copy Link</button>
+              </div>
+              {selectedShareChannel && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                  <button onClick={() => handleShare(selectedShareChannel, "private")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🔒 {getChannelLabel(selectedShareChannel)} Private</button>
+                  <button onClick={() => handleShare(selectedShareChannel, "public")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🌍 {getChannelLabel(selectedShareChannel)} Public</button>
+                </div>
+              )}
+              <button onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} style={{ width: "100%", padding: "5px", fontSize: 8, color: "#687287", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
         </div>

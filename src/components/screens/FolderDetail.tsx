@@ -14,6 +14,9 @@ interface FolderDetailProps {
 }
 
 type SortMode = "date" | "place" | "event";
+type ShareTarget = "folder" | "photos";
+type ShareVisibility = "private" | "public";
+type ShareChannel = "whatsapp" | "email" | "facebook" | "copy";
 
 export default function FolderDetail({ folder, onBack, onDelete, onRename, onImportPhotos, onChangeCover }: FolderDetailProps) {
   const { folders, albums } = useAppState();
@@ -23,6 +26,8 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(folder.title);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [shareTarget, setShareTarget] = useState<ShareTarget>("folder");
+  const [selectedShareChannel, setSelectedShareChannel] = useState<ShareChannel | null>(null);
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set());
   const [selectMode, setSelectMode] = useState(false);
   const [showCoverPicker, setShowCoverPicker] = useState(false);
@@ -77,15 +82,67 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
     setShowCoverPicker(false);
   };
 
-  const handleShare = async (type: "folder" | "photos") => {
-    const title = type === "folder" ? `Folder: ${name}` : `${selectedPhotos.size} selected photos`;
-    if (navigator.share) {
-      try { await navigator.share({ title, text: `Check out ${title} on SmartMemory App!`, url: window.location.href }); } catch {}
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied!");
+  const buildSharePayload = (target: ShareTarget, visibility: ShareVisibility) => {
+    const selectedCount = selectedPhotos.size;
+    const itemLabel = target === "folder"
+      ? `folder "${name}"`
+      : `${selectedCount} selected photo${selectedCount > 1 ? "s" : ""} from folder "${name}"`;
+    const shareTitle = target === "folder" ? `Folder: ${name}` : `Photos from ${name}`;
+    const shareText = visibility === "private"
+      ? `Private share: ${itemLabel} from SmartMemory App.`
+      : `Public share: ${itemLabel} from SmartMemory App.`;
+    const params = new URLSearchParams({
+      shareType: target,
+      visibility,
+      folderId: folder.id,
+    });
+
+    if (target === "photos" && selectedCount > 0) {
+      params.set("photoIds", Array.from(selectedPhotos).join(","));
     }
+
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    return { shareTitle, shareText, shareUrl };
+  };
+
+  const handleShare = async (channel: ShareChannel, visibility: ShareVisibility) => {
+    if (shareTarget === "photos" && selectedPhotos.size === 0) {
+      toast.error("Select photos first");
+      return;
+    }
+
+    const { shareTitle, shareText, shareUrl } = buildSharePayload(shareTarget, visibility);
+
+    if (channel === "copy") {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied!");
+      setShowShareSheet(false);
+      setSelectedShareChannel(null);
+      return;
+    }
+
+    const encodedText = encodeURIComponent(`${shareText} ${shareUrl}`);
+    const encodedTitle = encodeURIComponent(shareTitle);
+    const encodedBody = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+
+    const channelUrls: Record<Exclude<ShareChannel, "native" | "copy">, string> = {
+      whatsapp: `https://wa.me/?text=${encodedText}`,
+      email: `mailto:?subject=${encodedTitle}&body=${encodedBody}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    };
+
+    window.open(channelUrls[channel], "_blank", "noopener,noreferrer");
+    toast.success("Share window opened");
     setShowShareSheet(false);
+    setSelectedShareChannel(null);
+  };
+
+  const getChannelLabel = (channel: ShareChannel | null) => {
+    if (channel === "whatsapp") return "WhatsApp";
+    if (channel === "email") return "Email";
+    if (channel === "facebook") return "Facebook";
+    if (channel === "copy") return "Copy Link";
+    return "";
   };
 
   const toggleSelectPhoto = (id: string) => {
@@ -335,27 +392,68 @@ export default function FolderDetail({ folder, onBack, onDelete, onRename, onImp
       {/* Share sheet */}
       {showShareSheet && (
         <div className="absolute inset-0 flex flex-col justify-end" style={{ zIndex: 10, borderRadius: 38, overflow: "hidden" }}>
-          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => setShowShareSheet(false)} />
+          <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} />
           <div style={{ position: "relative", backgroundColor: "#fff", borderRadius: "12px 12px 0 0", padding: "12px 14px 20px" }}>
             <div className="flex items-center" style={{ marginBottom: 8, gap: 6 }}>
-              <button onClick={() => setShowShareSheet(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
+              <button onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}>
                 <ChevronLeft size={14} color="#394460" />
               </button>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
               <span style={{ fontSize: 8, color: "#687287", marginLeft: "auto" }}>SmartMemory App</span>
             </div>
             <div className="flex flex-col" style={{ gap: 6 }}>
-              <button onClick={() => handleShare("folder")}
-                style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
+              <button onClick={() => setShareTarget("folder")}
+                style={{
+                  width: "100%", padding: "8px", borderRadius: 6,
+                  backgroundColor: shareTarget === "folder" ? "#d9e4f7" : "#e8ecf4",
+                  color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left"
+                }}>
                 📁 Share Folder "{name}"
               </button>
               {selectedPhotos.size > 0 && (
-                <button onClick={() => handleShare("photos")}
-                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>
+                <button onClick={() => setShareTarget("photos")}
+                  style={{
+                    width: "100%", padding: "8px", borderRadius: 6,
+                    backgroundColor: shareTarget === "photos" ? "#d9e4f7" : "#e8ecf4",
+                    color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left"
+                  }}>
                   🖼️ Share {selectedPhotos.size} Selected Photo{selectedPhotos.size > 1 ? "s" : ""}
                 </button>
               )}
-              <button onClick={() => setShowShareSheet(false)}
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                <button onClick={() => setSelectedShareChannel("whatsapp")}
+                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#25D366", color: "#fff", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                  WhatsApp
+                </button>
+                <button onClick={() => setSelectedShareChannel("email")}
+                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                  Email
+                </button>
+                <button onClick={() => setSelectedShareChannel("facebook")}
+                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#1877F2", color: "#fff", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                  Facebook
+                </button>
+                <button onClick={() => setSelectedShareChannel("copy")}
+                  style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#dfe6f2", color: "#394460", fontSize: 10, fontWeight: 600, border: "none", cursor: "pointer" }}>
+                  Copy Link
+                </button>
+              </div>
+
+              {selectedShareChannel && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                  <button onClick={() => handleShare(selectedShareChannel, "private")}
+                    style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 10, fontWeight: 700, border: "none", cursor: "pointer" }}>
+                    🔒 {getChannelLabel(selectedShareChannel)} Private
+                  </button>
+                  <button onClick={() => handleShare(selectedShareChannel, "public")}
+                    style={{ width: "100%", padding: "8px", borderRadius: 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 10, fontWeight: 700, border: "none", cursor: "pointer" }}>
+                    🌍 {getChannelLabel(selectedShareChannel)} Public
+                  </button>
+                </div>
+              )}
+
+              <button onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }}
                 style={{ width: "100%", padding: "6px", borderRadius: 6, backgroundColor: "transparent", color: "#687287", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>
                 Cancel
               </button>
