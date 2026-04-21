@@ -219,6 +219,14 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     setExtraItems((prev) => [...prev, { type: "greeting", content: "🎉 Happy Celebration!", id: `greeting-${Date.now()}` }]);
     toast.success("Greeting card added!");
   };
+  const handleDeletePhoto = (photoId: string) => {
+    const nextPhotos = photos.filter((photo) => photo.id !== photoId);
+    onUpdateAlbum?.({
+      photos: nextPhotos,
+      photoCount: nextPhotos.length,
+    });
+    toast.success("Photo deleted from album");
+  };
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -412,7 +420,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     }
   };
 
-  // Fullscreen landscape scrapbook viewer using real album background
+  // Fullscreen landscape scrapbook viewer with clean white photo-book pages
   const renderScrapbookOverlay = () => {
     if (!viewingScrapbook) return null;
     const spread = spreads[currentSpread];
@@ -421,7 +429,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     return (
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
-        backgroundColor: "#e8ddd0",
+        backgroundColor: "#f3ede4",
         display: "flex", flexDirection: "column",
       }}>
         {/* Close + page indicator */}
@@ -435,32 +443,65 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           </span>
         </div>
 
-        {/* Book spread with album-bg.png (golden rings) — no white page backgrounds */}
+        {/* Book spread with clean white pages */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 4 }}>
           <div style={{
             width: "100%", height: "100%", position: "relative",
-            backgroundImage: "url(/images/album-bg-clean.png)",
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
+            background: "linear-gradient(180deg, #fcfcfb 0%, #f2f1ee 100%)",
+            borderRadius: 6,
+            boxShadow: "inset 0 0 0 1px rgba(205, 209, 214, 0.9), 0 10px 28px rgba(81, 67, 44, 0.12)",
           }}>
-            {/* Left page content — directly on the background, no white fill */}
             <div style={{
               position: "absolute",
-              top: "8%", bottom: "8%",
-              left: "10%", width: "36%",
-              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              top: "3%",
+              bottom: "3%",
+              left: "50%",
+              width: 10,
+              transform: "translateX(-50%)",
+              background: "linear-gradient(90deg, rgba(210,210,210,0) 0%, rgba(185,185,185,0.65) 50%, rgba(210,210,210,0) 100%)",
+              borderRadius: 999,
+              opacity: 0.55,
+            }} />
+
+            <div style={{
+              position: "absolute",
+              top: "2.8%",
+              bottom: "2.8%",
+              left: "2%",
+              width: "46.5%",
+              backgroundColor: "#ffffff",
+              borderRadius: 3,
+              boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+            }} />
+
+            <div style={{
+              position: "absolute",
+              top: "2.8%",
+              bottom: "2.8%",
+              right: "2%",
+              width: "46.5%",
+              backgroundColor: "#ffffff",
+              borderRadius: 3,
+              boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+            }} />
+
+            {/* Left page content */}
+            <div style={{
+              position: "absolute",
+              top: "9%", bottom: "9%",
+              left: "6%", width: "39%",
+              display: "flex", flexDirection: "column", gap: 10, padding: 0,
               justifyContent: spread.left.length === 1 ? "stretch" : "space-between",
             }}>
               {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
             </div>
 
-            {/* Right page content — directly on the background, no white fill */}
+            {/* Right page content */}
             <div style={{
               position: "absolute",
-              top: "8%", bottom: "8%",
-              right: "6%", width: "38%",
-              display: "flex", flexDirection: "column", gap: 6, padding: 8,
+              top: "9%", bottom: "9%",
+              right: "6%", width: "39%",
+              display: "flex", flexDirection: "column", gap: 10, padding: 0,
               justifyContent: spread.right.length === 1 ? "stretch" : "space-between",
             }}>
               {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
@@ -740,23 +781,6 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
         </div>
       )}
 
-      {/* Open Album Book button */}
-      <button onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
-        width: "100%", padding: "10px", borderRadius: 10, border: "2px solid #c9a84c",
-        backgroundColor: "#faf8f0", cursor: "pointer", marginBottom: 6,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        background: "linear-gradient(135deg, #f5f0e8 0%, #ebe4d6 100%)",
-      }}>
-        <span style={{ fontSize: 20 }}>📖</span>
-        <div style={{ textAlign: "left" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#5a4e3a", margin: 0 }}>Open Album Book</p>
-          <p style={{ fontSize: 7, color: "#8a7e6a", margin: "1px 0 0" }}>
-            {totalSpreads} page{totalSpreads !== 1 ? "s" : ""} · Rotate phone to landscape 📱↔️
-          </p>
-        </div>
-      </button>
-
       {/* Album cover preview */}
       <div onClick={() => { setCurrentSpread(0); setViewingScrapbook(true); }} style={{
         width: "100%", borderRadius: 8, overflow: "hidden", cursor: "pointer",
@@ -764,6 +788,47 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       }}>
         <img src={album.image} alt={title} style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
       </div>
+
+      {photos.length > 0 && (
+        <div style={{
+          marginTop: 6,
+          backgroundColor: "rgba(255,255,255,0.92)",
+          border: "1px solid #dde3f0",
+          borderRadius: 8,
+          padding: 6,
+        }}>
+          <div className="flex items-center justify-between" style={{ marginBottom: 5 }}>
+            <span style={{ fontSize: 8, fontWeight: 700, color: "#394460" }}>Album Photos</span>
+            <span style={{ fontSize: 7, color: "#7b869c" }}>Delete the photos you want</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
+            {photos.map((photo) => (
+              <div key={photo.id} style={{ position: "relative", borderRadius: 6, overflow: "hidden", aspectRatio: "1 / 1", backgroundColor: "#eef2f8" }}>
+                <img src={photo.url} alt={photo.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <button
+                  onClick={() => handleDeletePhoto(photo.id)}
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    width: 18,
+                    height: 18,
+                    borderRadius: "50%",
+                    border: "none",
+                    backgroundColor: "rgba(17,24,39,0.72)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Trash2 size={9} color="#fff" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Fullscreen scrapbook overlay */}
       {renderScrapbookOverlay()}
