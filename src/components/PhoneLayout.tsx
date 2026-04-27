@@ -100,9 +100,20 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
           <div className="flex flex-col items-center" style={{ padding: "30px 0" }}>
             <PlayCircle size={32} color="#8fa9dd" style={{ marginBottom: 8 }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: "#394460" }}>How It Works</span>
-            <span style={{ fontSize: 9, color: "#a0a8b8", marginTop: 4, textAlign: "center" }}>
+            <span style={{ fontSize: 9, color: "#a0a8b8", marginTop: 4, textAlign: "center", paddingLeft: 12, paddingRight: 12 }}>
               Watch tutorials on creating folders, albums, and sharing memories.
             </span>
+            <div style={{ paddingLeft: 10, paddingRight: 10, marginTop: 18 }}>
+              <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 8 }}>
+                This app helps you organise and relive your memories in a simple and emotional way.
+              </p>
+              <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 6 }}>
+                <span style={{ fontWeight: 700 }}>• Organising value:</span> Easily group your photos and videos into meaningful folders based on events, dates, or people — no more messy camera roll.
+              </p>
+              <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568" }}>
+                <span style={{ fontWeight: 700 }}>• Enhancing value:</span> Turn your memories into real experiences by adding music, notes, or videos to make them more alive and emotional.
+              </p>
+            </div>
           </div>
         );
       default: return null;
