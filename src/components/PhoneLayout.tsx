@@ -103,7 +103,7 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
             <span style={{ fontSize: 9, color: "#a0a8b8", marginTop: 4, textAlign: "center", paddingLeft: 12, paddingRight: 12 }}>
               Watch tutorials on creating folders, albums, and sharing memories.
             </span>
-            <div style={{ paddingLeft: 10, paddingRight: 10, marginTop: 18 }}>
+            <div style={{ paddingLeft: 10, paddingRight: 10, marginTop: 40 }}>
               <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 8 }}>
                 This app helps you organise and relive your memories in a simple and emotional way.
               </p>
