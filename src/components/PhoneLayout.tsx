@@ -231,31 +231,18 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
               {/* Grid */}
               <div style={{ width: 237, height: 432, overflowY: "auto", overflowX: "hidden", msOverflowStyle: "none", scrollbarWidth: "none" }} className="[&::-webkit-scrollbar]:hidden">
                 {activeContent ? activeContent : (
-                  <>
-                    <div className="flex flex-wrap justify-between">
-                      {cards.map((card) => (
-                        <div key={card.id} className="transition-all duration-200 ease-out hover:scale-[1.03]" style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
-                          <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
-                            <img src={card.image} alt={card.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                          </div>
-                          <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
-                            <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{card.title}</span>
-                          </div>
+                  <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12 }}>
+                    {cards.map((card) => (
+                      <div key={card.id} className="transition-all duration-200 ease-out hover:scale-[1.03]" style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
+                        <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
+                          <img src={card.image} alt={card.title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                         </div>
-                      ))}
-                    </div>
-                    <div style={{ paddingLeft: 4, paddingRight: 4, paddingBottom: 12, marginTop: 4 }}>
-                      <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 8 }}>
-                        This app helps you organise and relive your memories in a simple and emotional way.
-                      </p>
-                      <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 6 }}>
-                        <span style={{ fontWeight: 700 }}>• Organising value:</span> Easily group your photos and videos into meaningful folders based on events, dates, or people — no more messy camera roll.
-                      </p>
-                      <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568" }}>
-                        <span style={{ fontWeight: 700 }}>• Enhancing value:</span> Turn your memories into real experiences by adding music, notes, or videos to make them more alive and emotional.
-                      </p>
-                    </div>
-                  </>
+                        <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
+                          <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{card.title}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
