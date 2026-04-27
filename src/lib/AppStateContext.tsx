@@ -25,7 +25,14 @@ interface AppState {
   updateAlbum: (id: string, updates: Partial<Album>) => void;
 }
 
-const AppStateContext = createContext<AppState | null>(null);
+const globalAppState = globalThis as typeof globalThis & {
+  __appStateContext__?: React.Context<AppState | null>;
+};
+
+const AppStateContext = globalAppState.__appStateContext__ ?? createContext<AppState | null>(null);
+
+AppStateContext.displayName = "AppStateContext";
+globalAppState.__appStateContext__ = AppStateContext;
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>(() => loadFromStorage("folders", mockFolders));
