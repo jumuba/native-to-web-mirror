@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { mockFolders, mockAlbums, type Folder, type Album, type Photo } from "./mockData";
+import { mockFolders, mockAlbums, normalizeAlbums, type Folder, type Album, type Photo } from "./mockData";
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -29,10 +29,10 @@ const AppStateContext = createContext<AppState | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [folders, setFolders] = useState<Folder[]>(() => loadFromStorage("folders", mockFolders));
-  const [albums, setAlbums] = useState<Album[]>(() => loadFromStorage("albums", mockAlbums));
+  const [albums, setAlbums] = useState<Album[]>(() => normalizeAlbums(loadFromStorage("albums", mockAlbums)));
 
   useEffect(() => { try { localStorage.setItem("folders", JSON.stringify(folders)); } catch (e) { console.warn("localStorage full, folders not saved"); } }, [folders]);
-  useEffect(() => { try { localStorage.setItem("albums", JSON.stringify(albums)); } catch (e) { console.warn("localStorage full, albums not saved"); } }, [albums]);
+  useEffect(() => { try { localStorage.setItem("albums", JSON.stringify(normalizeAlbums(albums))); } catch (e) { console.warn("localStorage full, albums not saved"); } }, [albums]);
 
   const createFolder = useCallback((data: { name: string; color: string; font: string; hasPassword: boolean; isPrivate: boolean }) => {
     const newFolder: Folder = {
@@ -63,20 +63,20 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       notes: [],
       music: null,
     };
-    setAlbums((prev) => [newAlbum, ...prev]);
+    setAlbums((prev) => normalizeAlbums([newAlbum, ...prev]));
   }, []);
 
   const deleteFolder = useCallback((id: string) => setFolders((p) => p.filter((f) => f.id !== id)), []);
-  const deleteAlbum = useCallback((id: string) => setAlbums((p) => p.filter((a) => a.id !== id)), []);
+  const deleteAlbum = useCallback((id: string) => setAlbums((p) => normalizeAlbums(p.filter((a) => a.id !== id))), []);
   const renameFolder = useCallback((id: string, name: string) => setFolders((p) => p.map((f) => f.id === id ? { ...f, title: name } : f)), []);
-  const renameAlbum = useCallback((id: string, title: string) => setAlbums((p) => p.map((a) => a.id === id ? { ...a, title } : a)), []);
+  const renameAlbum = useCallback((id: string, title: string) => setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, title } : a))), []);
 
   const addPhotosToFolder = useCallback((id: string, photos: Photo[]) => {
     setFolders((p) => p.map((f) => f.id === id ? { ...f, photos: [...f.photos, ...photos], photoCount: f.photoCount + photos.length } : f));
   }, []);
 
   const addPhotosToAlbum = useCallback((id: string, photos: Photo[]) => {
-    setAlbums((p) => p.map((a) => a.id === id ? { ...a, photos: [...a.photos, ...photos], photoCount: a.photoCount + photos.length } : a));
+    setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, photos: [...a.photos, ...photos], photoCount: a.photoCount + photos.length } : a)));
   }, []);
 
   const updateFolderCover = useCallback((id: string, image: string) => {
@@ -84,11 +84,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateAlbumCover = useCallback((id: string, image: string) => {
-    setAlbums((p) => p.map((a) => a.id === id ? { ...a, image } : a));
+    setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, image } : a)));
   }, []);
 
   const updateAlbum = useCallback((id: string, updates: Partial<Album>) => {
-    setAlbums((p) => p.map((a) => a.id === id ? { ...a, ...updates } : a));
+    setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, ...updates } : a)));
   }, []);
 
   return (
