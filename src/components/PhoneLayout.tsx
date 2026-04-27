@@ -55,7 +55,6 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
 
   const sidebarItems = [
     { id: "photo-folders", label: "Photo Folders", icon: <ImageIcon size={13} />, path: "/", screen: null as SidebarScreen },
-    { id: "photo-albums", label: "Photo Albums", icon: <ImageIcon size={13} />, path: "/photo-albums", screen: null as SidebarScreen },
     { id: "photo-video-edit", label: "Photo Video Edit", icon: <PlayCircle size={13} />, path: "/photo-video-edit", screen: null as SidebarScreen },
     { id: "dashboard", label: "Dashboard", icon: <Home size={13} />, path: undefined, screen: "dashboard" as SidebarScreen },
     { id: "reminders", label: "Reminders", icon: <Bell size={13} />, path: undefined, screen: "reminders" as SidebarScreen },
@@ -203,14 +202,17 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
                   />
                 ))}
                 <div onClick={() => setSidebarScreen("how-it-works")} style={{
-                  marginTop: 6, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.48)",
-                  border: "1px solid rgba(214,223,241,0.9)", overflow: "hidden", height: 78, cursor: "pointer",
+                  marginTop: 6, marginLeft: "auto", marginRight: "auto",
+                  width: 110, height: 123, borderRadius: 8,
+                  backgroundColor: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(214,223,241,0.9)", overflow: "hidden", cursor: "pointer",
+                  display: "flex", flexDirection: "column",
                 }}>
                   <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
                     <p style={{ fontSize: 10.2, lineHeight: "10.2px", color: "#4150a9", fontWeight: 800, textAlign: "center", margin: 0 }}>HOW IT WORKS</p>
                   </div>
-                  <div className="flex items-center justify-center" style={{ height: 46, backgroundColor: "#8aa2d8" }}>
-                    <PlayCircle size={20} color="#ffffff" />
+                  <div className="flex items-center justify-center" style={{ flex: 1, backgroundColor: "#8aa2d8" }}>
+                    <PlayCircle size={28} color="#ffffff" />
                   </div>
                 </div>
               </div>
