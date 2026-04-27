@@ -199,9 +199,9 @@ export const mockDashboardStats: DashboardStats = {
 
 // ─── Pricing Plans ───
 export const mockPricingPlans: PricingPlan[] = [
-  { id: "free", name: "Free", price: "£0", features: ["5 GB Storage", "3 Folders", "Basic Editing"], isCurrent: true },
-  { id: "medium", name: "Medium", price: "£3.99/mo", features: ["50 GB Storage", "Unlimited Folders", "Advanced Editing", "Sharing", "Priority Support"], isCurrent: false },
-  { id: "premium", name: "Premium", price: "£6.99/mo", features: ["Unlimited Storage", "Unlimited Everything", "AI Features", "Collaboration", "Custom Themes", "Priority Support", "No Ads"], isCurrent: false },
+  { id: "free", name: "Free", price: "£0", features: ["5 GB Storage", "3 Memory Folders", "Basic Editing", "Basic Sharing"], isCurrent: true },
+  { id: "medium", name: "Medium", price: "£3.99/mo", features: ["50 GB Storage", "Unlimited Memory Folders", "Advanced Editing (filters, music, text)", "Sharing (links, moments)"], isCurrent: false },
+  { id: "premium", name: "Premium", price: "£6.99/mo", features: ["Unlimited Storage", "Full Editing (YouCam style)", "AI Features (auto-organise, suggestions)", "Collaboration (share memories live)", "Custom Themes", "No Ads"], isCurrent: false },
 ];
 
 // ─── FAQ ───
