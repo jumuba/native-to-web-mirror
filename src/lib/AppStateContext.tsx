@@ -102,8 +102,11 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAppState() {
+export function useAppState(): AppState {
   const ctx = useContext(AppStateContext);
-  if (!ctx) throw new Error("useAppState must be used within AppStateProvider");
+  if (!ctx) {
+    throw new Error("useAppState must be used within AppStateProvider");
+  }
   return ctx;
 }
+
