@@ -225,8 +225,10 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
                   <div style={{ paddingTop: 6, paddingLeft: 6, paddingRight: 6, paddingBottom: 4 }}>
                     <p style={{ fontSize: 10.2, lineHeight: "10.2px", color: "#4150a9", fontWeight: 800, textAlign: "center", margin: 0 }}>HOW IT WORKS</p>
                   </div>
-                  <div className="flex items-center justify-center" style={{ flex: 1, backgroundColor: "#8aa2d8" }}>
-                    <PlayCircle size={28} color="#ffffff" />
+                  <div className="flex flex-col items-center justify-center" style={{ flex: 1, backgroundColor: "#8aa2d8", paddingTop: 4, paddingBottom: 4 }}>
+                    <span style={{ fontSize: 8.5, color: "#ffffff", fontWeight: 600, marginBottom: 3 }}>The purpose of</span>
+                    <PlayCircle size={24} color="#ffffff" />
+                    <span style={{ fontSize: 8.5, color: "#ffffff", fontWeight: 700, marginTop: 3 }}>SmartMemory</span>
                   </div>
                 </div>
               </div>
