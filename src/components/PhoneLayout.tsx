@@ -110,6 +110,9 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
               <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 6 }}>
                 <span style={{ fontWeight: 700 }}>• Organising value:</span> Easily group your photos and videos into meaningful folders based on events, dates, or people — no more messy camera roll.
               </p>
+              <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568", marginBottom: 6 }}>
+                <span style={{ fontWeight: 700 }}>• Editing value:</span> Quickly edit your photos and videos like apps such as YouCam — enhance, adjust, and personalise your content in seconds.
+              </p>
               <p style={{ fontSize: 10, lineHeight: "13px", color: "#4a5568" }}>
                 <span style={{ fontWeight: 700 }}>• Enhancing value:</span> Turn your memories into real experiences by adding music, notes, or videos to make them more alive and emotional.
               </p>
