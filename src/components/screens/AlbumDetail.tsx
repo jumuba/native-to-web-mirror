@@ -87,37 +87,14 @@ const MARRIAGE_DEMO_SPREADS: Spread[] = [
   },
 ];
 
-function buildSpreads(photos: { id: string; url: string; title: string }[], items: PageItem[], isMarriage: boolean): Spread[] {
-  if (isMarriage) {
-    const userItems: PageItem[] = [
-      ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
-      ...items,
-    ];
-    const extraSpreads: Spread[] = [];
-    let i = 0;
-    while (i < userItems.length) {
-      const left = userItems.slice(i, i + 2);
-      const right = userItems.slice(i + 2, i + 4);
-      if (left.length > 0) extraSpreads.push({ left, right });
-      i += 4;
-    }
-    return [...MARRIAGE_DEMO_SPREADS, ...extraSpreads];
-  }
-  const allItems: PageItem[] = [
+function buildPages(photos: { id: string; url: string; title: string }[], items: PageItem[]): PageItem[] {
+  return [
     ...photos.map((p) => ({ type: "photo" as const, content: p.url, id: p.id })),
     ...items,
   ];
-  if (allItems.length === 0) return [];
-  const spreads: Spread[] = [];
-  let i = 0;
-  while (i < allItems.length) {
-    const left = allItems.slice(i, i + 2);
-    const right = allItems.slice(i + 2, i + 4);
-    if (left.length > 0) spreads.push({ left, right });
-    i += 4;
-  }
-  return spreads;
 }
+
+
 
 export default function AlbumDetail({ album, onBack, onDelete, onRename, onImportPhotos, onChangeCover, onUpdateAlbum }: AlbumDetailProps) {
   const { folders, albums } = useAppState();
@@ -135,6 +112,8 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [currentSpread, setCurrentSpread] = useState(0);
+  const [flipDirection, setFlipDirection] = useState<"next" | "prev">("next");
+  const [turningPage, setTurningPage] = useState<{ direction: "next" | "prev"; item: PageItem | null } | null>(null);
   const [noteText, setNoteText] = useState("");
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [showMusicInput, setShowMusicInput] = useState(false);
@@ -142,6 +121,10 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [viewingScrapbook, setViewingScrapbook] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const [viewport, setViewport] = useState(() => ({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  }));
 
   const [extraItems, setExtraItems] = useState<PageItem[]>(() => {
     const items: PageItem[] = [];
@@ -157,16 +140,46 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
   const recordingIntervalRef = useRef<number | null>(null);
 
   const photos = album.photos;
-  const isMarriage = album.title.toLowerCase().includes("marriage") || album.title.toLowerCase().includes("wedding");
-  const spreads = buildSpreads(photos, extraItems, isMarriage);
-  const totalSpreads = spreads.length;
+  const pages = buildPages(photos, extraItems);
+  const totalPages = pages.length;
+  const currentPageItem = pages[currentSpread] || null;
+  const isPhone = viewport.width < 900;
+  const isPhoneLandscape = isPhone && viewport.width > viewport.height;
 
   useEffect(() => { setTitle(album.title); }, [album.title]);
   useEffect(() => { return () => { if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current); }; }, []);
-  useEffect(() => { if (currentSpread >= totalSpreads && totalSpreads > 0) setCurrentSpread(totalSpreads - 1); }, [totalSpreads, currentSpread]);
+  useEffect(() => { if (currentSpread >= totalPages && totalPages > 0) setCurrentSpread(totalPages - 1); }, [totalPages, currentSpread]);
+  useEffect(() => {
+    const handleResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  const goNext = () => { if (currentSpread < totalSpreads - 1) setCurrentSpread(currentSpread + 1); };
-  const goPrev = () => { if (currentSpread > 0) setCurrentSpread(currentSpread - 1); };
+  const goNext = () => {
+    if (currentSpread < totalPages - 1 && !turningPage) {
+      setFlipDirection("next");
+      setTurningPage({ direction: "next", item: currentPageItem });
+      window.setTimeout(() => {
+        setCurrentSpread((prev) => Math.min(prev + 1, totalPages - 1));
+      }, 260);
+      window.setTimeout(() => {
+        setTurningPage(null);
+      }, 860);
+    }
+  };
+  const goPrev = () => {
+    if (currentSpread > 0 && !turningPage) {
+      setFlipDirection("prev");
+      setTurningPage({ direction: "prev", item: currentPageItem });
+      window.setTimeout(() => {
+        setCurrentSpread((prev) => Math.max(prev - 1, 0));
+      }, 260);
+      window.setTimeout(() => {
+        setTurningPage(null);
+      }, 860);
+    }
+  };
 
   const handleRenameConfirm = () => {
     setRenaming(false);
@@ -314,7 +327,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       case "note":
         return (
           <div key={item.id} style={{
-            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            width: "100%", height: h, borderRadius: isPhoneLandscape ? 0 : 6, overflow: "hidden",
             backgroundColor: "#fffdf0", border: "3px solid #1a2744",
             display: "flex", alignItems: "center", justifyContent: "center", padding: 12,
             backgroundImage: "repeating-linear-gradient(transparent, transparent 22px, #e8dfc0 22px, #e8dfc0 23px)",
@@ -358,7 +371,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       case "music":
         return (
           <div key={item.id} style={{
-            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            width: "100%", height: h, borderRadius: isPhoneLandscape ? 0 : 6, overflow: "hidden",
             backgroundColor: "#f0eeff", border: "3px solid #1a2744",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 12,
           }}>
@@ -370,7 +383,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       case "voucher":
         return (
           <div key={item.id} style={{
-            width: "100%", height: h, borderRadius: 6, overflow: "hidden",
+            width: "100%", height: h, borderRadius: isPhoneLandscape ? 0 : 6, overflow: "hidden",
             backgroundColor: "#fefce8", border: "3px dashed #fbbf24",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 12,
           }}>
@@ -387,7 +400,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       case "greeting":
         return (
           <div key={item.id} style={{
-            width: "100%", height: h, borderRadius: 6, backgroundColor: "#fff0f6",
+            width: "100%", height: h, borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#fff0f6",
             border: "3px solid #f9a8d4", display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center", padding: 12,
           }}>
@@ -398,7 +411,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
       case "money":
         return (
           <div key={item.id} style={{
-            width: "100%", height: h, borderRadius: 6, backgroundColor: "#f0fdf4",
+            width: "100%", height: h, borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#f0fdf4",
             border: "3px solid #86efac", display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center", padding: 12,
           }}>
@@ -420,119 +433,121 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     }
   };
 
-  // Fullscreen landscape scrapbook viewer with clean white photo-book pages
+  // Fullscreen album viewer with one photo per page and wave-like page turning
   const renderScrapbookOverlay = () => {
-    if (!viewingScrapbook) return null;
-    const spread = spreads[currentSpread];
-    if (!spread) return null;
+    if (!viewingScrapbook || !currentPageItem) return null;
+
+    const pageWidth = isPhone ? Math.max(viewport.width - 18, 320) : Math.min(viewport.width - 120, 900);
+    const pageHeight = isPhone ? Math.max(viewport.height - 150, 470) : Math.min(viewport.height - 120, 760);
+
+    const renderAlbumPage = (item: PageItem | null, accentSide: "left" | "right") => (
+      <div style={{
+        width: pageWidth,
+        height: pageHeight,
+        maxWidth: "100%",
+        background: "linear-gradient(180deg, #fffefc 0%, #f6f0e7 100%)",
+        borderRadius: isPhone ? 14 : 18,
+        border: "1px solid rgba(201, 188, 170, 0.95)",
+        boxShadow: "0 18px 40px rgba(76, 57, 36, 0.18), inset 0 0 0 1px rgba(255,255,255,0.75)",
+        padding: isPhone ? 12 : 20,
+        position: "relative",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          [accentSide === "left" ? "left" : "right"]: 0,
+          width: isPhone ? 16 : 22,
+          background: accentSide === "left"
+            ? "linear-gradient(90deg, rgba(115,92,65,0.18), rgba(255,255,255,0))"
+            : "linear-gradient(270deg, rgba(115,92,65,0.18), rgba(255,255,255,0))",
+          pointerEvents: "none",
+        }} />
+        <div style={{
+          width: "100%",
+          height: "100%",
+          borderRadius: isPhone ? 12 : 14,
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
+          boxShadow: "inset 0 0 0 1px rgba(229, 231, 235, 0.92)",
+        }}>
+          {item
+            ? renderSpreadItem(item, 1, (url) => setPlayingVideo(url))
+            : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#b7aa98", fontStyle: "italic", fontSize: isPhone ? 13 : 15 }}>Blank page</div>}
+        </div>
+      </div>
+    );
 
     return (
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
-        backgroundColor: "#f3ede4",
+        background: "linear-gradient(180deg, #efe6d8 0%, #e2d1b7 100%)",
         display: "flex", flexDirection: "column",
       }}>
-        {/* Close + page indicator */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 12px", backgroundColor: "rgba(0,0,0,0.25)" }}>
+        <style>{`
+          @keyframes waveFlipForward {
+            0% { opacity: 1; transform: perspective(2400px) rotateY(0deg) translateY(0) rotateZ(0deg); border-radius: 18px; }
+            25% { opacity: 1; transform: perspective(2400px) rotateY(-18deg) translateY(-12px) rotateZ(-1.2deg); border-radius: 30px 18px 26px 18px; }
+            60% { opacity: 0.85; transform: perspective(2400px) rotateY(-72deg) translateY(-6px) rotateZ(-4deg); border-radius: 40px 16px 38px 16px; }
+            100% { opacity: 0.05; transform: perspective(2400px) rotateY(-118deg) translateY(0) rotateZ(-6deg); border-radius: 46px 14px 44px 14px; }
+          }
+          @keyframes waveFlipBackward {
+            0% { opacity: 1; transform: perspective(2400px) rotateY(0deg) translateY(0) rotateZ(0deg); border-radius: 18px; }
+            25% { opacity: 1; transform: perspective(2400px) rotateY(18deg) translateY(-12px) rotateZ(1.2deg); border-radius: 18px 30px 18px 26px; }
+            60% { opacity: 0.85; transform: perspective(2400px) rotateY(72deg) translateY(-6px) rotateZ(4deg); border-radius: 16px 40px 16px 38px; }
+            100% { opacity: 0.05; transform: perspective(2400px) rotateY(118deg) translateY(0) rotateZ(6deg); border-radius: 14px 46px 14px 44px; }
+          }
+        `}</style>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isPhone ? "8px 12px" : "10px 16px", backgroundColor: "rgba(90,77,61,0.34)" }}>
           <button onClick={() => setViewingScrapbook(false)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
             <X size={18} color="#fff" />
             <span style={{ fontSize: 12, color: "#fff", fontWeight: 600 }}>Close</span>
           </button>
           <span style={{ fontSize: 11, color: "#fff", fontWeight: 600 }}>
-            {currentSpread + 1} / {totalSpreads}
+            {currentSpread + 1} / {totalPages}
           </span>
         </div>
 
-        {/* Book spread with clean white pages */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 4 }}>
-          <div style={{
-            width: "100%", height: "100%", position: "relative",
-            background: "linear-gradient(180deg, #fcfcfb 0%, #f2f1ee 100%)",
-            borderRadius: 6,
-            boxShadow: "inset 0 0 0 1px rgba(205, 209, 214, 0.9), 0 10px 28px rgba(81, 67, 44, 0.12)",
-          }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: isPhone ? "10px 8px" : "24px 30px", overflow: "hidden", position: "relative" }}>
+          {renderAlbumPage(currentPageItem, flipDirection === "next" ? "left" : "right")}
+
+          {turningPage?.item && (
             <div style={{
               position: "absolute",
-              top: "3%",
-              bottom: "3%",
+              top: "50%",
               left: "50%",
-              width: 10,
-              transform: "translateX(-50%)",
-              background: "linear-gradient(90deg, rgba(210,210,210,0) 0%, rgba(185,185,185,0.65) 50%, rgba(210,210,210,0) 100%)",
-              borderRadius: 999,
-              opacity: 0.55,
-            }} />
-
-            <div style={{
-              position: "absolute",
-              top: "2.8%",
-              bottom: "2.8%",
-              left: "2%",
-              width: "46.5%",
-              backgroundColor: "#ffffff",
-              borderRadius: 3,
-              boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-            }} />
-
-            <div style={{
-              position: "absolute",
-              top: "2.8%",
-              bottom: "2.8%",
-              right: "2%",
-              width: "46.5%",
-              backgroundColor: "#ffffff",
-              borderRadius: 3,
-              boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-            }} />
-
-            {/* Left page content */}
-            <div style={{
-              position: "absolute",
-              top: "9%", bottom: "9%",
-              left: "6%", width: "39%",
-              display: "flex", flexDirection: "column", gap: 10, padding: 0,
-              justifyContent: spread.left.length === 1 ? "stretch" : "space-between",
+              transform: "translate(-50%, -50%)",
+              zIndex: 5,
+              transformOrigin: turningPage.direction === "next" ? "left center" : "right center",
+              animation: `${turningPage.direction === "next" ? "waveFlipForward" : "waveFlipBackward"} 820ms cubic-bezier(0.22, 0.7, 0.2, 1) forwards`,
+              pointerEvents: "none",
             }}>
-              {spread.left.map((item) => renderSpreadItem(item, spread.left.length, (url) => setPlayingVideo(url)))}
+              {renderAlbumPage(turningPage.item, turningPage.direction === "next" ? "right" : "left")}
             </div>
-
-            {/* Right page content */}
-            <div style={{
-              position: "absolute",
-              top: "9%", bottom: "9%",
-              right: "6%", width: "39%",
-              display: "flex", flexDirection: "column", gap: 10, padding: 0,
-              justifyContent: spread.right.length === 1 ? "stretch" : "space-between",
-            }}>
-              {spread.right.length > 0 ? spread.right.map((item) => renderSpreadItem(item, spread.right.length, (url) => setPlayingVideo(url))) : (
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.3 }}>
-                  <span style={{ fontSize: 13, color: "#8a7e6a", fontStyle: "italic" }}>Empty page</span>
-                </div>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Navigation arrows */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 20, padding: "6px 0 10px" }}>
-          <button onClick={goPrev} disabled={currentSpread === 0} style={{
-            width: 40, height: 40, borderRadius: "50%", border: "none", cursor: currentSpread === 0 ? "default" : "pointer",
-            backgroundColor: currentSpread === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)",
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: isPhone ? 14 : 20, padding: isPhone ? "4px 0 10px" : "8px 0 14px" }}>
+          <button onClick={goPrev} disabled={currentSpread === 0 || !!turningPage} style={{
+            width: isPhone ? 48 : 44, height: isPhone ? 48 : 44, borderRadius: "50%", border: "none", cursor: currentSpread === 0 || !!turningPage ? "default" : "pointer",
+            backgroundColor: currentSpread === 0 || !!turningPage ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.88)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
           }}>
-            <ChevronLeft size={22} color={currentSpread === 0 ? "#999" : "#333"} />
+            <ChevronLeft size={isPhone ? 24 : 22} color={currentSpread === 0 || !!turningPage ? "#999" : "#333"} />
           </button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#5a4e3a" }}>
-            Page {currentSpread + 1} of {totalSpreads}
+          <span style={{ fontSize: isPhone ? 15 : 13, fontWeight: 700, color: "#5a4e3a" }}>
+            Page {currentSpread + 1} of {totalPages}
           </span>
-          <button onClick={goNext} disabled={currentSpread >= totalSpreads - 1} style={{
-            width: 40, height: 40, borderRadius: "50%", border: "none", cursor: currentSpread >= totalSpreads - 1 ? "default" : "pointer",
-            backgroundColor: currentSpread >= totalSpreads - 1 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)",
+          <button onClick={goNext} disabled={currentSpread >= totalPages - 1 || !!turningPage} style={{
+            width: isPhone ? 48 : 44, height: isPhone ? 48 : 44, borderRadius: "50%", border: "none", cursor: currentSpread >= totalPages - 1 || !!turningPage ? "default" : "pointer",
+            backgroundColor: currentSpread >= totalPages - 1 || !!turningPage ? "rgba(255,255,255,0.28)" : "rgba(255,255,255,0.88)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
           }}>
-            <ChevronRight size={22} color={currentSpread >= totalSpreads - 1 ? "#999" : "#333"} />
+            <ChevronRight size={isPhone ? 24 : 22} color={currentSpread >= totalPages - 1 || !!turningPage ? "#999" : "#333"} />
           </button>
         </div>
       </div>
@@ -803,7 +818,7 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5 }}>
             {photos.map((photo) => (
-              <div key={photo.id} style={{ position: "relative", borderRadius: 6, overflow: "hidden", aspectRatio: "1 / 1", backgroundColor: "#eef2f8" }}>
+              <div key={photo.id} style={{ position: "relative", borderRadius: isPhoneLandscape ? 0 : 6, overflow: "hidden", aspectRatio: "1 / 1", backgroundColor: "#eef2f8" }}>
                 <img src={photo.url} alt={photo.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 <button
                   onClick={() => handleDeletePhoto(photo.id)}
@@ -848,17 +863,17 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
               <p style={{ fontSize: 10, fontWeight: 700, color: "#394460", margin: 0 }}>Share</p>
             </div>
             <div className="flex flex-col" style={{ gap: 4 }}>
-              <button onClick={() => setShareTarget("album")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📒 Share Album "{title}"</button>
+              <button onClick={() => setShareTarget("album")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left" }}>📒 Share Album "{title}"</button>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                <button onClick={() => setSelectedShareChannel("whatsapp")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#25D366", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>WhatsApp</button>
-                <button onClick={() => setSelectedShareChannel("email")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Email</button>
-                <button onClick={() => setSelectedShareChannel("facebook")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#1877F2", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Facebook</button>
-                <button onClick={() => setSelectedShareChannel("copy")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#dfe6f2", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Copy Link</button>
+                <button onClick={() => setSelectedShareChannel("whatsapp")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#25D366", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>WhatsApp</button>
+                <button onClick={() => setSelectedShareChannel("email")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Email</button>
+                <button onClick={() => setSelectedShareChannel("facebook")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#1877F2", color: "#fff", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Facebook</button>
+                <button onClick={() => setSelectedShareChannel("copy")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#dfe6f2", color: "#394460", fontSize: 9, fontWeight: 600, border: "none", cursor: "pointer" }}>Copy Link</button>
               </div>
               {selectedShareChannel && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                  <button onClick={() => handleShare(selectedShareChannel, "private")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🔒 {getChannelLabel(selectedShareChannel)} Private</button>
-                  <button onClick={() => handleShare(selectedShareChannel, "public")} style={{ width: "100%", padding: "7px", borderRadius: 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🌍 {getChannelLabel(selectedShareChannel)} Public</button>
+                  <button onClick={() => handleShare(selectedShareChannel, "private")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#e8ecf4", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🔒 {getChannelLabel(selectedShareChannel)} Private</button>
+                  <button onClick={() => handleShare(selectedShareChannel, "public")} style={{ width: "100%", padding: "7px", borderRadius: isPhoneLandscape ? 0 : 6, backgroundColor: "#d9e4f7", color: "#394460", fontSize: 9, fontWeight: 700, border: "none", cursor: "pointer" }}>🌍 {getChannelLabel(selectedShareChannel)} Public</button>
                 </div>
               )}
               <button onClick={() => { setShowShareSheet(false); setSelectedShareChannel(null); }} style={{ width: "100%", padding: "5px", fontSize: 8, color: "#687287", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
@@ -869,3 +884,15 @@ export default function AlbumDetail({ album, onBack, onDelete, onRename, onImpor
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+

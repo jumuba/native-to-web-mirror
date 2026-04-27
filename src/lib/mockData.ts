@@ -140,13 +140,34 @@ export const mockFolders: Folder[] = [
 
 // ─── Mock Albums ───
 export const mockAlbums: Album[] = [
-  { id: "dad-remembrance", title: "Dad Remembrance", image: cardDadRemembrance, category: "Memorial", photoCount: 20, createdAt: "2024-01-10", isCollaborative: true, isPrivate: false, theme: "classic", photos: makeMockPhotos(20, "dadrem"), notes: [{ id: "n1", text: "Forever in our hearts ❤️", createdAt: "2024-01-10" }], music: "Amazing Grace" },
-  { id: "mum-remembrance", title: "Mum Remembrance", image: cardMumRemembrance, category: "Memorial", photoCount: 16, createdAt: "2024-02-14", isCollaborative: false, isPrivate: true, theme: "elegant", photos: makeMockPhotos(16, "mumrem"), notes: [], music: null },
-  { id: "twins-birth", title: "Twins Birth", image: cardTwinsBirth, category: "Birth", photoCount: 35, createdAt: "2024-03-22", isCollaborative: true, isPrivate: false, theme: "playful", photos: makeMockPhotos(35, "twins"), notes: [{ id: "n2", text: "Welcome to the world! 👶👶", createdAt: "2024-03-22" }], music: "Twinkle Twinkle" },
-  { id: "wife-birthday", title: "My Wife Birthday", image: cardWifeBirthday, category: "Birthday", photoCount: 22, createdAt: "2024-04-18", isCollaborative: false, isPrivate: false, theme: "romantic", photos: makeMockPhotos(22, "wifebday"), notes: [], music: "Happy Birthday" },
-  { id: "clara-bday", title: "Clara Bday", image: cardClaraBday, category: "Birthday", photoCount: 14, createdAt: "2024-05-30", isCollaborative: true, isPrivate: false, theme: "fun", photos: makeMockPhotos(14, "clara"), notes: [], music: null },
-  { id: "tom-marriage", title: "Tom Marriage", image: cardTomMarriage, category: "Wedding", photoCount: 48, createdAt: "2024-06-15", isCollaborative: true, isPrivate: false, theme: "classic", photos: makeMockPhotos(48, "tom"), notes: [{ id: "n3", text: "Best wedding ever! 💒", createdAt: "2024-06-15" }], music: "Canon in D" },
+  { id: "dad-remembrance", title: "My Wife Birthday", image: "/album-covers/album-wife-birthday.png", category: "Memorial", photoCount: 20, createdAt: "2024-01-10", isCollaborative: true, isPrivate: false, theme: "classic", photos: makeMockPhotos(20, "dadrem"), notes: [{ id: "n1", text: "Forever in our hearts ❤️", createdAt: "2024-01-10" }], music: "Amazing Grace" },
+  { id: "mum-remembrance", title: "Sandy Birth", image: "/album-covers/album-baby.png", category: "Memorial", photoCount: 16, createdAt: "2024-02-14", isCollaborative: false, isPrivate: true, theme: "elegant", photos: makeMockPhotos(16, "mumrem"), notes: [], music: null },
+  { id: "twins-birth", title: "Julie Graduation", image: "/album-covers/album-twins.png", category: "Birth", photoCount: 35, createdAt: "2024-03-22", isCollaborative: true, isPrivate: false, theme: "playful", photos: makeMockPhotos(35, "twins"), notes: [{ id: "n2", text: "Welcome to the world! 👶👶", createdAt: "2024-03-22" }], music: "Twinkle Twinkle" },
+  { id: "wife-birthday", title: "My Wife Birthday", image: "/album-covers/album-emily.png", category: "Birthday", photoCount: 22, createdAt: "2024-04-18", isCollaborative: false, isPrivate: false, theme: "romantic", photos: makeMockPhotos(22, "wifebday"), notes: [], music: "Happy Birthday" },
+  { id: "clara-bday", title: "Amanda & Kevin Mariage", image: "/album-covers/album-rings.png", category: "Birthday", photoCount: 14, createdAt: "2024-05-30", isCollaborative: true, isPrivate: false, theme: "fun", photos: makeMockPhotos(14, "clara"), notes: [], music: null },
+  { id: "tom-marriage", title: "Dan Remembrance", image: "/album-covers/album-wedding-board.png", category: "Wedding", photoCount: 48, createdAt: "2024-06-15", isCollaborative: true, isPrivate: false, theme: "classic", photos: makeMockPhotos(48, "tom"), notes: [{ id: "n3", text: "Best wedding ever! 💒", createdAt: "2024-06-15" }], music: "Canon in D" },
 ];
+
+export function normalizeAlbums(albums: Album[]): Album[] {
+  const seededIds = new Set(mockAlbums.map((album) => album.id));
+  const normalizedSeeded = mockAlbums.map((seedAlbum) => {
+    const savedAlbum = albums.find((album) => album.id === seedAlbum.id);
+    if (!savedAlbum) return seedAlbum;
+
+    return {
+      ...savedAlbum,
+      title: seedAlbum.title,
+      image: seedAlbum.image,
+      category: seedAlbum.category,
+      isCollaborative: seedAlbum.isCollaborative,
+      theme: savedAlbum.theme || seedAlbum.theme,
+      createdAt: savedAlbum.createdAt || seedAlbum.createdAt,
+    };
+  });
+
+  const extraAlbums = albums.filter((album) => !seededIds.has(album.id));
+  return [...normalizedSeeded, ...extraAlbums];
+}
 
 // ─── Mock Reminders ───
 export const mockReminders: Reminder[] = [

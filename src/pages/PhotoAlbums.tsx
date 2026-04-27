@@ -5,12 +5,20 @@ import { useAppState } from "@/lib/AppStateContext";
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
   return (
-    <div className="transition-all duration-200 ease-out hover:scale-[1.03]" onClick={onClick} style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
-      <div style={{ width: 110, height: 95, borderRadius: "8px 8px 0 0", overflow: "hidden" }}>
-        <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-      </div>
-      <div style={{ width: 110, backgroundColor: "#ffffff", borderRadius: "0 0 8px 8px", padding: "4px 6px", minHeight: 28 }}>
-        <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500 }}>{title}</span>
+    <div className="transition-all duration-200 ease-out hover:scale-[1.02]" onClick={onClick} style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
+      <div style={{
+        width: 110,
+        backgroundColor: "rgba(255,255,255,0.96)",
+        borderRadius: 8,
+        padding: 3,
+        boxShadow: "0 3px 10px rgba(124, 142, 174, 0.08)",
+      }}>
+        <div style={{ width: 104, height: 95, borderRadius: 6, overflow: "hidden", margin: "0 auto" }}>
+          <img src={image} alt={title} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        </div>
+        <div style={{ width: "100%", padding: "5px 5px 4px", minHeight: 26, display: "flex", alignItems: "flex-start" }}>
+          <span style={{ fontSize: 10, color: "#4a5568", fontWeight: 500, lineHeight: "11px" }}>{title}</span>
+        </div>
       </div>
     </div>
   );
@@ -79,7 +87,7 @@ export default function PhotoAlbums() {
     <PhoneLayout
       cards={[]}
       customContent={
-        <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12 }}>
+        <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12, alignItems: "flex-start" }}>
           {albums.map((album) => (
             <Card key={album.id} image={album.image} title={album.title} onClick={() => setSelectedAlbumId(album.id)} />
           ))}
