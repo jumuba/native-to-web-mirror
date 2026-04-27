@@ -199,8 +199,8 @@ export const mockDashboardStats: DashboardStats = {
 
 // ─── Pricing Plans ───
 export const mockPricingPlans: PricingPlan[] = [
-  { id: "free", name: "Free", price: "£0", features: ["5 GB Storage", "3 Folders", "3 Albums", "Basic Editing"], isCurrent: true },
-  { id: "medium", name: "Medium", price: "£3.99/mo", features: ["50 GB Storage", "Unlimited Folders", "Unlimited Albums", "Advanced Editing", "Sharing", "Priority Support"], isCurrent: false },
+  { id: "free", name: "Free", price: "£0", features: ["5 GB Storage", "3 Folders", "Basic Editing"], isCurrent: true },
+  { id: "medium", name: "Medium", price: "£3.99/mo", features: ["50 GB Storage", "Unlimited Folders", "Advanced Editing", "Sharing", "Priority Support"], isCurrent: false },
   { id: "premium", name: "Premium", price: "£6.99/mo", features: ["Unlimited Storage", "Unlimited Everything", "AI Features", "Collaboration", "Custom Themes", "Priority Support", "No Ads"], isCurrent: false },
 ];
 
