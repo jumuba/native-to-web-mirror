@@ -55,7 +55,6 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
 
   const sidebarItems = [
     { id: "photo-folders", label: "Photo Folders", icon: <ImageIcon size={13} />, path: "/", screen: null as SidebarScreen },
-    { id: "photo-albums", label: "Photo Albums", icon: <ImageIcon size={13} />, path: "/photo-albums", screen: null as SidebarScreen },
     { id: "photo-video-edit", label: "Photo Video Edit", icon: <PlayCircle size={13} />, path: "/photo-video-edit", screen: null as SidebarScreen },
     { id: "dashboard", label: "Dashboard", icon: <Home size={13} />, path: undefined, screen: "dashboard" as SidebarScreen },
     { id: "reminders", label: "Reminders", icon: <Bell size={13} />, path: undefined, screen: "reminders" as SidebarScreen },
