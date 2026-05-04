@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { mockFolders, mockAlbums, normalizeAlbums, type Folder, type Album, type Photo } from "./mockData";
+import {
+  fetchAlbums,
+  upsertAlbum,
+  deleteAlbumRow,
+  insertPhotos,
+} from "./supabaseService";
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
