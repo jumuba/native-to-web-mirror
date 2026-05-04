@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PhoneLayout from "@/components/PhoneLayout";
 import AlbumDetail from "@/components/screens/AlbumDetail";
 import { useAppState } from "@/lib/AppStateContext";
+import { uploadPhotoFile } from "@/lib/supabaseService";
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
   return (
