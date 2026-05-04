@@ -129,14 +129,37 @@ export async function fetchReminders(): Promise<Reminder[] | null> {
 }
 
 export async function insertReminder(r: Reminder) {
-  await supabase.from("reminders").insert({
-    id: r.id,
-    title: r.title,
-    message: r.message,
-    remind_at: r.date || null,
-    linked_to: r.linkedTo,
-    linked_type: r.linkedType,
-  });
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data, error } = await supabase
+    .from("reminders")
+    .insert({
+      id: /^[0-9a-f-]{36}$/i.test(r.id) ? r.id : undefined,
+      user_id: uid,
+      title: r.title,
+      message: r.message,
+      remind_at: r.date || null,
+      linked_to: r.linkedTo && /^[0-9a-f-]{36}$/i.test(r.linkedTo) ? r.linkedTo : null,
+      linked_type: r.linkedType,
+    })
+    .select()
+    .single();
+  if (error) {
+    console.warn("insertReminder failed:", error.message);
+    return null;
+  }
+  return data;
+}
+
+export async function updateReminder(id: string, updates: Partial<Reminder>) {
+  const row: any = {};
+  if (updates.title !== undefined) row.title = updates.title;
+  if (updates.message !== undefined) row.message = updates.message;
+  if (updates.date !== undefined) row.remind_at = updates.date || null;
+  if (updates.linkedTo !== undefined) row.linked_to = updates.linkedTo;
+  if (updates.linkedType !== undefined) row.linked_type = updates.linkedType;
+  await supabase.from("reminders").update(row).eq("id", id);
 }
 
 export async function deleteReminderRow(id: string) {
@@ -153,23 +176,70 @@ export async function fetchSubscription(userId: string) {
   return data;
 }
 
-// ─── SHARES (prepared for later) ────────────────────────
-export async function createShareLink(resourceType: "album" | "folder" | "photo", resourceId: string) {
-  const { data } = await supabase
+// ─── SHARES ─────────────────────────────────────────────
+export async function createShareLink(
+  resourceType: "album" | "folder" | "photo",
+  resourceId: string,
+  expiresAt?: string | null
+) {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data, error } = await supabase
     .from("shares")
-    .insert({ resource_type: resourceType, resource_id: resourceId })
+    .insert({
+      user_id: uid,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      expires_at: expiresAt ?? null,
+    })
     .select()
     .single();
+  if (error) {
+    console.warn("createShareLink failed:", error.message);
+    return null;
+  }
+  const url = `${window.location.origin}/share/${data.token}`;
+  return { ...data, url };
+}
+
+export async function fetchShareByToken(token: string) {
+  const { data } = await supabase
+    .from("shares")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
   return data;
+}
+
+export async function deleteShareLink(id: string) {
+  await supabase.from("shares").delete().eq("id", id);
 }
 
 // ─── USERS (profile) ────────────────────────────────────
 export async function upsertUserProfile(profile: {
-  id?: string;
   email?: string;
   display_name?: string;
   avatar_url?: string;
   plan?: string;
 }) {
-  await supabase.from("users").upsert(profile);
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return;
+  await supabase
+    .from("users")
+    .upsert({ ...profile, auth_user_id: uid }, { onConflict: "auth_user_id" });
 }
+
+export async function fetchUserProfile() {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("auth_user_id", uid)
+    .maybeSingle();
+  return data;
+}
+
