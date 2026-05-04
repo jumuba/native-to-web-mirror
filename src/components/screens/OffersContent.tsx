@@ -1,20 +1,58 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Check, Crown, Star, Zap } from "lucide-react";
 import { mockPricingPlans } from "@/lib/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { fetchSubscription } from "@/lib/supabaseService";
+import { toast } from "@/hooks/use-toast";
 
 export default function OffersContent() {
   const [selectedPlan, setSelectedPlan] = useState("free");
+  const [currentPlan, setCurrentPlan] = useState<string>("free");
+  const [status, setStatus] = useState<string>("inactive");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const icons = { free: Star, medium: Zap, premium: Crown };
+  const icons = { free: Star, basic: Star, medium: Zap, premium: Crown } as const;
+
+  useEffect(() => {
+    (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      const sub = await fetchSubscription(auth.user.id);
+      if (sub) {
+        setCurrentPlan(sub.plan ?? "free");
+        setStatus(sub.status ?? "inactive");
+        setSelectedPlan(sub.plan ?? "free");
+      }
+    })();
+  }, []);
+
+  const handleUpgrade = async (plan: (typeof mockPricingPlans)[number]) => {
+    if (!plan.priceId) return;
+    try {
+      setLoadingId(plan.id);
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: plan.priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
+    } catch (e: any) {
+      toast({ title: "Checkout failed", description: e.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setLoadingId(null);
+    }
+  };
 
   return (
     <div style={{ padding: "0 4px" }}>
-      <p style={{ fontSize: 13, fontWeight: 700, color: "#394460", marginBottom: 10 }}>Offers & Plans</p>
+      <p style={{ fontSize: 13, fontWeight: 700, color: "#394460", marginBottom: 10 }}>
+        Offers & Plans {status !== "inactive" && <span style={{ fontSize: 9, color: "#1db954" }}>• {status}</span>}
+      </p>
 
       {mockPricingPlans.map((plan) => {
         const Icon = icons[plan.id as keyof typeof icons] || Star;
         const isSelected = selectedPlan === plan.id;
         const isPremium = plan.id === "premium";
+        const isCurrent = plan.id === currentPlan;
 
         return (
           <div
@@ -45,13 +83,18 @@ export default function OffersContent() {
                 </div>
               ))}
             </div>
-            {plan.isCurrent && (
+            {isCurrent && (
               <div style={{ marginTop: 6, fontSize: 8, color: "#1db954", fontWeight: 700, textAlign: "center" }}>
                 ✓ Current Plan
               </div>
             )}
-            {!plan.isCurrent && isSelected && (
+            {!isCurrent && isSelected && plan.priceId && (
               <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpgrade(plan);
+                }}
+                disabled={loadingId === plan.id}
                 style={{
                   width: "100%",
                   marginTop: 6,
@@ -63,9 +106,10 @@ export default function OffersContent() {
                   fontWeight: 700,
                   border: "none",
                   cursor: "pointer",
+                  opacity: loadingId === plan.id ? 0.6 : 1,
                 }}
               >
-                Upgrade Now
+                {loadingId === plan.id ? "Loading..." : "Start 7-day free trial"}
               </button>
             )}
           </div>
