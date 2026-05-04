@@ -70,7 +70,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
 
   const createAlbum = useCallback((data: { title: string; category: string; theme: string; isPrivate: boolean }) => {
     const newAlbum: Album = {
-      id: `album-${Date.now()}`,
+      id: (crypto as any).randomUUID ? crypto.randomUUID() : `album-${Date.now()}`,
       title: data.title,
       image: `https://picsum.photos/seed/${Date.now()}/300/300`,
       category: data.category,
@@ -84,19 +84,38 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       music: null,
     };
     setAlbums((prev) => normalizeAlbums([newAlbum, ...prev]));
+    upsertAlbum(newAlbum).catch(() => {});
   }, []);
 
   const deleteFolder = useCallback((id: string) => setFolders((p) => p.filter((f) => f.id !== id)), []);
-  const deleteAlbum = useCallback((id: string) => setAlbums((p) => normalizeAlbums(p.filter((a) => a.id !== id))), []);
+  const deleteAlbum = useCallback((id: string) => {
+    setAlbums((p) => normalizeAlbums(p.filter((a) => a.id !== id)));
+    deleteAlbumRow(id).catch(() => {});
+  }, []);
   const renameFolder = useCallback((id: string, name: string) => setFolders((p) => p.map((f) => f.id === id ? { ...f, title: name } : f)), []);
-  const renameAlbum = useCallback((id: string, title: string) => setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, title } : a))), []);
+  const renameAlbum = useCallback((id: string, title: string) => {
+    setAlbums((p) => {
+      const next = normalizeAlbums(p.map((a) => a.id === id ? { ...a, title } : a));
+      const target = next.find((a) => a.id === id);
+      if (target) upsertAlbum(target).catch(() => {});
+      return next;
+    });
+  }, []);
 
   const addPhotosToFolder = useCallback((id: string, photos: Photo[]) => {
     setFolders((p) => p.map((f) => f.id === id ? { ...f, photos: [...f.photos, ...photos], photoCount: f.photoCount + photos.length } : f));
   }, []);
 
   const addPhotosToAlbum = useCallback((id: string, photos: Photo[]) => {
-    setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, photos: [...a.photos, ...photos], photoCount: a.photoCount + photos.length } : a)));
+    const withIds = photos.map((p) => ({
+      ...p,
+      id: (crypto as any).randomUUID ? crypto.randomUUID() : p.id,
+    }));
+    setAlbums((p) => normalizeAlbums(p.map((a) => a.id === id ? { ...a, photos: [...a.photos, ...withIds], photoCount: a.photoCount + withIds.length } : a)));
+    // Only mirror if album id looks like a UUID (created via Supabase-aware flow)
+    if (/^[0-9a-f-]{36}$/i.test(id)) {
+      insertPhotos(id, withIds).catch(() => {});
+    }
   }, []);
 
   const updateFolderCover = useCallback((id: string, image: string) => {
