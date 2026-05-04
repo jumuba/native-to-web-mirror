@@ -50,7 +50,7 @@ export default function RemindersContent() {
                   date: saved.remind_at ?? "",
                   message: saved.message ?? "",
                   linkedTo: saved.linked_to ?? null,
-                  linkedType: saved.linked_type ?? null,
+                  linkedType: (saved.linked_type as "album" | "folder" | null) ?? null,
                 }
               : r
           )
