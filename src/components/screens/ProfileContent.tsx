@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { Camera, Palette, Type, Globe, Edit3 } from "lucide-react";
+import { Camera, Palette, Type, Globe, Edit3, LogOut } from "lucide-react";
 import { mockUser } from "@/lib/mockData";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function ProfileContent() {
+  const { signOut } = useAuth();
   const [user, setUser] = useState(mockUser);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(user.name);
@@ -162,6 +164,18 @@ export default function ProfileContent() {
           ))}
         </div>
       </div>
+
+      <button
+        onClick={() => signOut()}
+        className="flex items-center justify-center"
+        style={{
+          width: "100%", height: 30, marginTop: 6, borderRadius: 8,
+          backgroundColor: "rgba(255,255,255,0.8)", border: "1px solid rgba(214,223,241,0.9)",
+          color: "#c0392b", fontSize: 11, fontWeight: 700, cursor: "pointer", gap: 6,
+        }}
+      >
+        <LogOut size={11} /> Sign out
+      </button>
     </div>
   );
 }

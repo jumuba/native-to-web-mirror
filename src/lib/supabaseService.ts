@@ -43,8 +43,12 @@ export async function fetchAlbums(): Promise<Album[] | null> {
 }
 
 export async function upsertAlbum(album: Album) {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return;
   const row = {
     id: album.id,
+    user_id: uid,
     title: album.title,
     cover_image: album.image,
     category: album.category,
@@ -91,9 +95,13 @@ export async function uploadPhotoFile(file: File, albumId?: string): Promise<str
 
 export async function insertPhotos(albumId: string, photos: Photo[]) {
   if (!photos.length) return;
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return;
   const rows = photos.map((p) => ({
     id: p.id,
     album_id: albumId,
+    user_id: uid,
     url: p.url,
     title: p.title,
     place: p.place,
