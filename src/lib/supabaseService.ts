@@ -63,6 +63,32 @@ export async function deleteAlbumRow(id: string) {
 }
 
 // ─── PHOTOS ─────────────────────────────────────────────
+const PHOTO_BUCKET = "smartmemory-photos";
+
+/**
+ * Upload a single image File to Supabase Storage and return its public URL.
+ * Returns null if upload fails (caller can fall back to a local data URL).
+ */
+export async function uploadPhotoFile(file: File, albumId?: string): Promise<string | null> {
+  try {
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const rand = (crypto as any).randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const path = `${albumId ?? "misc"}/${rand}.${ext}`;
+    const { error } = await supabase.storage
+      .from(PHOTO_BUCKET)
+      .upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+    if (error) {
+      console.warn("Storage upload failed:", error.message);
+      return null;
+    }
+    const { data } = supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+    return data?.publicUrl ?? null;
+  } catch (e) {
+    console.warn("Storage upload exception:", e);
+    return null;
+  }
+}
+
 export async function insertPhotos(albumId: string, photos: Photo[]) {
   if (!photos.length) return;
   const rows = photos.map((p) => ({
