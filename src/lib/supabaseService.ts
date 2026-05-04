@@ -176,23 +176,70 @@ export async function fetchSubscription(userId: string) {
   return data;
 }
 
-// ─── SHARES (prepared for later) ────────────────────────
-export async function createShareLink(resourceType: "album" | "folder" | "photo", resourceId: string) {
-  const { data } = await supabase
+// ─── SHARES ─────────────────────────────────────────────
+export async function createShareLink(
+  resourceType: "album" | "folder" | "photo",
+  resourceId: string,
+  expiresAt?: string | null
+) {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data, error } = await supabase
     .from("shares")
-    .insert({ resource_type: resourceType, resource_id: resourceId })
+    .insert({
+      user_id: uid,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      expires_at: expiresAt ?? null,
+    })
     .select()
     .single();
+  if (error) {
+    console.warn("createShareLink failed:", error.message);
+    return null;
+  }
+  const url = `${window.location.origin}/share/${data.token}`;
+  return { ...data, url };
+}
+
+export async function fetchShareByToken(token: string) {
+  const { data } = await supabase
+    .from("shares")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
   return data;
+}
+
+export async function deleteShareLink(id: string) {
+  await supabase.from("shares").delete().eq("id", id);
 }
 
 // ─── USERS (profile) ────────────────────────────────────
 export async function upsertUserProfile(profile: {
-  id?: string;
   email?: string;
   display_name?: string;
   avatar_url?: string;
   plan?: string;
 }) {
-  await supabase.from("users").upsert(profile);
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return;
+  await supabase
+    .from("users")
+    .upsert({ ...profile, auth_user_id: uid }, { onConflict: "auth_user_id" });
 }
+
+export async function fetchUserProfile() {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("auth_user_id", uid)
+    .maybeSingle();
+  return data;
+}
+
