@@ -129,14 +129,37 @@ export async function fetchReminders(): Promise<Reminder[] | null> {
 }
 
 export async function insertReminder(r: Reminder) {
-  await supabase.from("reminders").insert({
-    id: r.id,
-    title: r.title,
-    message: r.message,
-    remind_at: r.date || null,
-    linked_to: r.linkedTo,
-    linked_type: r.linkedType,
-  });
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth.user?.id;
+  if (!uid) return null;
+  const { data, error } = await supabase
+    .from("reminders")
+    .insert({
+      id: /^[0-9a-f-]{36}$/i.test(r.id) ? r.id : undefined,
+      user_id: uid,
+      title: r.title,
+      message: r.message,
+      remind_at: r.date || null,
+      linked_to: r.linkedTo && /^[0-9a-f-]{36}$/i.test(r.linkedTo) ? r.linkedTo : null,
+      linked_type: r.linkedType,
+    })
+    .select()
+    .single();
+  if (error) {
+    console.warn("insertReminder failed:", error.message);
+    return null;
+  }
+  return data;
+}
+
+export async function updateReminder(id: string, updates: Partial<Reminder>) {
+  const row: any = {};
+  if (updates.title !== undefined) row.title = updates.title;
+  if (updates.message !== undefined) row.message = updates.message;
+  if (updates.date !== undefined) row.remind_at = updates.date || null;
+  if (updates.linkedTo !== undefined) row.linked_to = updates.linkedTo;
+  if (updates.linkedType !== undefined) row.linked_type = updates.linkedType;
+  await supabase.from("reminders").update(row).eq("id", id);
 }
 
 export async function deleteReminderRow(id: string) {
