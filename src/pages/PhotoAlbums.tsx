@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PhoneLayout from "@/components/PhoneLayout";
 import AlbumDetail from "@/components/screens/AlbumDetail";
 import { useAppState } from "@/lib/AppStateContext";
+import { uploadPhotoFile } from "@/lib/supabaseService";
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
   return (
@@ -52,14 +53,19 @@ export default function PhotoAlbums() {
 
   const handleImportPhotos = async (albumId: string, files: File[]) => {
     const newPhotos = await Promise.all(
-      files.map(async (file, i) => ({
-        id: `imported-${Date.now()}-${i}`,
-        url: await compressImage(file),
-        title: file.name,
-        date: new Date().toISOString().slice(0, 10),
-        place: "Imported",
-        event: "Import",
-      }))
+      files.map(async (file, i) => {
+        // Try Supabase Storage first; fall back to compressed local data URL
+        const publicUrl = await uploadPhotoFile(file, albumId);
+        const url = publicUrl ?? (await compressImage(file));
+        return {
+          id: `imported-${Date.now()}-${i}`,
+          url,
+          title: file.name,
+          date: new Date().toISOString().slice(0, 10),
+          place: "Imported",
+          event: "Import",
+        };
+      })
     );
     addPhotosToAlbum(albumId, newPhotos);
   };
