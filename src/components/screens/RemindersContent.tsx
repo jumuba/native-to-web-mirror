@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Bell, Trash2, Link as LinkIcon, Calendar } from "lucide-react";
 import { mockReminders, type Reminder } from "@/lib/mockData";
+import {
+  fetchReminders,
+  insertReminder,
+  deleteReminderRow,
+} from "@/lib/supabaseService";
 
 export default function RemindersContent() {
   const [reminders, setReminders] = useState<Reminder[]>(mockReminders);
@@ -9,27 +14,54 @@ export default function RemindersContent() {
   const [newDate, setNewDate] = useState("");
   const [newMessage, setNewMessage] = useState("");
 
-  const handleCreate = () => {
+  useEffect(() => {
+    fetchReminders()
+      .then((rows) => {
+        if (rows && rows.length) setReminders(rows);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleCreate = async () => {
     if (!newTitle.trim()) return;
-    setReminders([
-      ...reminders,
-      {
-        id: `r-${Date.now()}`,
-        title: newTitle,
-        date: newDate || "2026-12-31",
-        message: newMessage,
-        linkedTo: null,
-        linkedType: null,
-      },
-    ]);
+    const tempId = `r-${Date.now()}`;
+    const draft: Reminder = {
+      id: tempId,
+      title: newTitle,
+      date: newDate || "2026-12-31",
+      message: newMessage,
+      linkedTo: null,
+      linkedType: null,
+    };
+    setReminders((prev) => [...prev, draft]);
     setNewTitle("");
     setNewDate("");
     setNewMessage("");
     setCreating(false);
+    try {
+      const saved = await insertReminder(draft);
+      if (saved) {
+        setReminders((prev) =>
+          prev.map((r) =>
+            r.id === tempId
+              ? {
+                  id: saved.id,
+                  title: saved.title,
+                  date: saved.remind_at ?? "",
+                  message: saved.message ?? "",
+                  linkedTo: saved.linked_to ?? null,
+                  linkedType: saved.linked_type ?? null,
+                }
+              : r
+          )
+        );
+      }
+    } catch {}
   };
 
   const handleDelete = (id: string) => {
     setReminders(reminders.filter((r) => r.id !== id));
+    if (/^[0-9a-f-]{36}$/i.test(id)) deleteReminderRow(id).catch(() => {});
   };
 
   return (
