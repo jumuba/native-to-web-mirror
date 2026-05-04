@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import {
   Home, ImageIcon, Bell, User, Gift, ShieldCheck, HelpCircle, Calendar,
   ChevronDown, Search, Mic, PlayCircle, Signal, Wifi, BatteryFull,
+  Loader2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppState } from "@/lib/AppStateContext";
@@ -11,6 +12,7 @@ import bgSkyFloral from "@/assets/bg-sky-floral.png";
 import avatar from "@/assets/avatar.png";
 
 import CreateImportSheet from "@/components/CreateImportSheet";
+import { searchPhotosWithAi, type AiPhotoSearchResult } from "@/lib/aiService";
 import DashboardContent from "@/components/screens/DashboardContent";
 import RemindersContent from "@/components/screens/RemindersContent";
 import ProfileContent from "@/components/screens/ProfileContent";
@@ -50,6 +52,10 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
   const { createFolder, createAlbum } = useAppState();
   const [showCreateImport, setShowCreateImport] = React.useState(false);
   const [sidebarScreen, setSidebarScreen] = React.useState<SidebarScreen>(null);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchResults, setSearchResults] = React.useState<AiPhotoSearchResult[]>([]);
+  const [searching, setSearching] = React.useState(false);
+  const [searchError, setSearchError] = React.useState<string | null>(null);
 
   const currentPath = location.pathname;
 
@@ -125,6 +131,61 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
 
   const activeContent = sidebarScreen ? getSidebarScreenContent() : customContent;
 
+  const handleAiSearch = async () => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setSearchResults([]);
+      setSearchError(null);
+      return;
+    }
+
+    setSearching(true);
+    setSearchError(null);
+    try {
+      const results = await searchPhotosWithAi(query);
+      setSearchResults(results);
+    } catch (e: any) {
+      setSearchResults([]);
+      setSearchError(e.message ?? "Search failed");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const searchContent = searchQuery.trim() || searching || searchError || searchResults.length > 0
+    ? (
+      <div style={{ paddingBottom: 12 }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#394460" }}>AI photo search</span>
+          <button onClick={() => { setSearchQuery(""); setSearchResults([]); setSearchError(null); }} style={{ background: "none", border: "none", color: "#687287", fontSize: 9, fontWeight: 700, cursor: "pointer" }}>Clear</button>
+        </div>
+        {searching && (
+          <div className="flex items-center" style={{ gap: 6, padding: "10px 0" }}>
+            <Loader2 size={14} color="#8fa9dd" className="animate-spin" />
+            <span style={{ fontSize: 10, color: "#687287", fontWeight: 600 }}>Searching photos...</span>
+          </div>
+        )}
+        {searchError && <p style={{ fontSize: 10, color: "#c0392b", margin: "4px 0 8px" }}>{searchError}</p>}
+        {!searching && !searchError && searchResults.length === 0 && searchQuery.trim() && (
+          <p style={{ fontSize: 10, color: "#687287", margin: "8px 0" }}>No matching photos found.</p>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
+          {searchResults.map((photo) => (
+            <div key={photo.id} style={{ borderRadius: 5, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.82)" }}>
+              <div style={{ aspectRatio: "1", overflow: "hidden" }}>
+                <img src={photo.url} alt={photo.title ?? "Photo"} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              </div>
+              <div style={{ padding: "3px 4px" }}>
+                <p style={{ fontSize: 7.5, color: "#394460", fontWeight: 700, margin: 0, lineHeight: "9px" }}>{photo.title || photo.event || "Photo"}</p>
+                <p style={{ fontSize: 7, color: "#8fa9dd", margin: "2px 0 0", lineHeight: "8px" }}>{photo.place || photo.taken_at || ""}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+    : null;
+
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#ffffff" }}>
       <div style={{
@@ -191,8 +252,20 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
                 border: "1px solid rgba(214,223,241,0.95)", paddingLeft: 10, paddingRight: 10, marginLeft: -3,
               }}>
                 <Search size={15} color="#6f7890" className="mr-[6px]" />
-                <input type="text" placeholder="Search..." className="flex-1 outline-none bg-transparent" style={{ fontSize: 12.8, color: "#6a7388", border: "none", padding: 0 }} />
-                <Mic size={14} color="#6d7488" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="flex-1 outline-none bg-transparent"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAiSearch();
+                  }}
+                  style={{ fontSize: 12.8, color: "#6a7388", border: "none", padding: 0 }}
+                />
+                <button onClick={handleAiSearch} disabled={searching} style={{ background: "none", border: "none", cursor: searching ? "default" : "pointer", padding: 0, display: "flex" }}>
+                  {searching ? <Loader2 size={14} color="#6d7488" className="animate-spin" /> : <Mic size={14} color="#6d7488" />}
+                </button>
               </div>
             </div>
 
@@ -235,7 +308,7 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
 
               {/* Grid */}
               <div style={{ width: 237, height: 432, overflowY: "auto", overflowX: "hidden", msOverflowStyle: "none", scrollbarWidth: "none" }} className="[&::-webkit-scrollbar]:hidden">
-                {activeContent ? activeContent : (
+                {searchContent || (activeContent ? activeContent : (
                   <div className="flex flex-wrap justify-between" style={{ paddingBottom: 12 }}>
                     {cards.map((card) => (
                       <div key={card.id} className="transition-all duration-200 ease-out hover:scale-[1.03]" style={{ width: 110, marginBottom: 14, cursor: "pointer" }}>
@@ -248,7 +321,7 @@ export default function PhoneLayout({ cards, customContent, overlay }: PhoneLayo
                       </div>
                     ))}
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>

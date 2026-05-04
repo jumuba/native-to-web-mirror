@@ -57,7 +57,7 @@ export interface UserProfile {
   language: string;
   themeColor: string;
   font: string;
-  plan: "free" | "medium" | "premium";
+  plan: "free" | "basic" | "medium" | "premium";
 }
 
 export interface DashboardStats {
@@ -75,6 +75,7 @@ export interface PricingPlan {
   price: string;
   features: string[];
   isCurrent: boolean;
+  priceId?: string;
 }
 
 export interface FAQItem {
@@ -198,7 +199,7 @@ export const mockDashboardStats: DashboardStats = {
 };
 
 // ─── Pricing Plans ───
-export const mockPricingPlans: (PricingPlan & { priceId?: string })[] = [
+export const mockPricingPlans: PricingPlan[] = [
   { id: "free", name: "Free", price: "£0", features: ["5 GB Storage", "3 Photo Folders", "Basic Editing", "Basic Sharing"], isCurrent: true },
   { id: "basic", name: "Basic", price: "£1.99/mo", features: ["20 GB Storage", "10 Photo Folders", "Basic Editing", "Sharing"], isCurrent: false, priceId: "price_1TTDPJRGCq8kXsN3GmpPDrGh" },
   { id: "medium", name: "Medium", price: "£3.99/mo", features: ["50 GB Storage", "Unlimited Photo Folders", "Advanced Photo and Video Editing (filters, music, text, and more)", "Sharing (links, moments)"], isCurrent: false, priceId: "price_1TTDWGRGCq8kXsN3bKW16QNb" },

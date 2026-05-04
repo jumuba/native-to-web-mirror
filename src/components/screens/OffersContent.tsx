@@ -34,7 +34,8 @@ export default function OffersContent() {
         body: { priceId: plan.priceId },
       });
       if (error) throw error;
-      if (data?.url) window.location.href = data.url;
+      if (!data?.url) throw new Error(data?.error ?? "Checkout did not return a payment link");
+      window.location.href = data.url;
     } catch (e: any) {
       toast({ title: "Checkout failed", description: e.message ?? "Try again", variant: "destructive" });
     } finally {

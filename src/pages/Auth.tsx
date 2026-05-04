@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { toast } from "@/hooks/use-toast";
 import bgSkyFloral from "@/assets/bg-sky-floral.png";
 
 export default function Auth() {
@@ -11,23 +12,47 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const suppressAutoRedirectRef = useRef(false);
 
   useEffect(() => {
-    if (session) navigate("/", { replace: true });
+    if (session && !suppressAutoRedirectRef.current) navigate("/", { replace: true });
   }, [session, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const res = mode === "login"
-      ? await signIn(email, password)
-      : await signUp(email, password, displayName || undefined);
+    setSuccess(null);
+
+    if (mode === "login") {
+      const res = await signIn(email, password);
+      setBusy(false);
+      if (res.error) setError(res.error);
+      else navigate("/", { replace: true });
+      return;
+    }
+
+    suppressAutoRedirectRef.current = true;
+    const res = await signUp(email, password, displayName || undefined);
     setBusy(false);
-    if (res.error) setError(res.error);
-    else if (mode === "login") navigate("/", { replace: true });
-    else setError("Account created. You can sign in now.");
+    if (res.error) {
+      suppressAutoRedirectRef.current = false;
+      setError(res.error);
+      return;
+    }
+
+    if (res.requiresEmailConfirmation) {
+      suppressAutoRedirectRef.current = false;
+      setSuccess("Please check your email to confirm your account.");
+      setMode("login");
+      setPassword("");
+      return;
+    }
+
+    toast({ title: "Account created successfully." });
+    navigate("/", { replace: true });
   };
 
   return (
@@ -69,6 +94,7 @@ export default function Auth() {
             />
 
             {error && <p style={{ fontSize: 10.5, color: "#c0392b", margin: 0 }}>{error}</p>}
+            {success && <p style={{ fontSize: 10.5, color: "#1f8f4d", margin: 0 }}>{success}</p>}
 
             <button type="submit" disabled={busy} style={{
               height: 36, borderRadius: 6, backgroundColor: "#8fa9dd", color: "#fff",
@@ -77,7 +103,7 @@ export default function Auth() {
               {busy ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
             </button>
 
-            <button type="button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(null); }} style={{
+            <button type="button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(null); setSuccess(null); }} style={{
               background: "none", border: "none", color: "#5665c9", fontSize: 11, fontWeight: 600, cursor: "pointer", marginTop: 4,
             }}>
               {mode === "login" ? "No account? Register" : "Have an account? Sign in"}

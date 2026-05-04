@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   FolderPlus, BookOpen, ImagePlus, Video, Smartphone,
   Cloud, Monitor, Link, Music, X, CheckCircle, AlertCircle,
-  Loader2, Lock, Globe, EyeOff,
+  Loader2, Lock, Globe, EyeOff, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { mockFolders, mockAlbums } from "@/lib/mockData";
+import { suggestAlbumTitles } from "@/lib/aiService";
+import { useAppState } from "@/lib/AppStateContext";
 
 const options = [
   { id: "create-folder", label: "Create Folder", icon: FolderPlus, color: "#8fa9dd" },
@@ -34,6 +36,7 @@ interface CreateImportSheetProps {
 }
 
 export default function CreateImportSheet({ open, onClose, onCreateFolder, onCreateAlbum }: CreateImportSheetProps) {
+  const { albums, folders } = useAppState();
   const [flow, setFlow] = useState<FlowState>("idle");
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +55,9 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
   const [albumCategory, setAlbumCategory] = useState("Birthday");
   const [albumTheme, setAlbumTheme] = useState("classic");
   const [albumPrivate, setAlbumPrivate] = useState(false);
+  const [suggestingAlbumTitle, setSuggestingAlbumTitle] = useState(false);
+  const [albumTitleSuggestions, setAlbumTitleSuggestions] = useState<string[]>([]);
+  const [albumAiError, setAlbumAiError] = useState<string | null>(null);
 
   // Add Link state
   const [linkUrl, setLinkUrl] = useState("");
@@ -69,6 +75,7 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
       setFlow("idle"); setProgress(0); setFolderName(""); setFolderColor(folderColors[0]);
       setFolderFont("Default"); setFolderPassword(false); setFolderPrivate(false);
       setAlbumTitle(""); setAlbumCategory("Birthday"); setAlbumTheme("classic"); setAlbumPrivate(false);
+      setAlbumTitleSuggestions([]); setAlbumAiError(null); setSuggestingAlbumTitle(false);
       setLinkUrl(""); setLinkType("YouTube"); setMusicSource("YouTube"); setMusicInput("");
       setSaveTarget(null); setImportedFiles([]); setCurrentImportType("");
     }
@@ -131,6 +138,21 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
     onCreateAlbum?.({ title: albumTitle.trim(), category: albumCategory, theme: albumTheme, isPrivate: albumPrivate });
     toast.success(`Album "${albumTitle.trim()}" created!`);
     onClose();
+  };
+
+  const handleSuggestAlbumTitle = async () => {
+    setSuggestingAlbumTitle(true);
+    setAlbumAiError(null);
+    try {
+      const titles = await suggestAlbumTitles({ albums, folders, category: albumCategory, theme: albumTheme });
+      if (titles.length === 0) throw new Error("No suggestions returned");
+      setAlbumTitleSuggestions(titles);
+      setAlbumTitle(titles[0]);
+    } catch (e: any) {
+      setAlbumAiError(e.message ?? "Could not suggest a title");
+    } finally {
+      setSuggestingAlbumTitle(false);
+    }
   };
 
   const handleSaveLink = () => {
@@ -282,6 +304,27 @@ export default function CreateImportSheet({ open, onClose, onCreateFolder, onCre
             <div style={{ marginBottom: 8 }}>
               <label style={labelStyle}>Album Title</label>
               <input style={inputStyle} value={albumTitle} onChange={(e) => setAlbumTitle(e.target.value)} placeholder="My Album" autoFocus />
+              <button onClick={handleSuggestAlbumTitle} disabled={suggestingAlbumTitle} className="flex items-center justify-center" style={{
+                width: "100%", height: 28, borderRadius: 6, backgroundColor: "#f0eeff",
+                color: "#6d55c7", fontSize: 10, fontWeight: 700, border: "none",
+                cursor: suggestingAlbumTitle ? "default" : "pointer", marginTop: 5, opacity: suggestingAlbumTitle ? 0.7 : 1,
+                gap: 4,
+              }}>
+                {suggestingAlbumTitle ? <Loader2 size={11} className="animate-spin" /> : <Sparkles size={11} />}
+                {suggestingAlbumTitle ? "Suggesting..." : "AI Suggest"}
+              </button>
+              {albumAiError && <p style={{ fontSize: 9, color: "#c0392b", margin: "4px 0 0" }}>{albumAiError}</p>}
+              {albumTitleSuggestions.length > 0 && (
+                <div className="flex flex-wrap" style={{ gap: 4, marginTop: 5 }}>
+                  {albumTitleSuggestions.map((title) => (
+                    <button key={title} onClick={() => setAlbumTitle(title)} style={{
+                      padding: "3px 6px", borderRadius: 6, fontSize: 8.5, fontWeight: 600,
+                      backgroundColor: albumTitle === title ? "#8b5cf6" : "#f0f2f5",
+                      color: albumTitle === title ? "#fff" : "#5b6585", border: "none", cursor: "pointer",
+                    }}>{title}</button>
+                  ))}
+                </div>
+              )}
             </div>
             <div style={{ marginBottom: 8 }}>
               <label style={labelStyle}>Category</label>
