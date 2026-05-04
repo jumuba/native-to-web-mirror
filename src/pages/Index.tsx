@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import PhoneLayout from "@/components/PhoneLayout";
 import FolderDetail from "@/components/screens/FolderDetail";
 import { useAppState } from "@/lib/AppStateContext";
+import { uploadPhotoFile } from "@/lib/supabaseService";
 import type { Folder } from "@/lib/mockData";
 
 function Card({ image, title, onClick }: { image: string; title: string; onClick?: () => void }) {
