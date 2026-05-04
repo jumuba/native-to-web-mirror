@@ -12,6 +12,7 @@ import Auth from "./pages/Auth.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import StripeCancel from "./pages/StripeCancel.tsx";
 import StripeSuccess from "./pages/StripeSuccess.tsx";
+import Admin from "./pages/Admin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/photo-albums" element={<ProtectedRoute><PhotoAlbums /></ProtectedRoute>} />
               <Route path="/photo-video-edit" element={<ProtectedRoute><PhotoVideoEdit /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
               <Route path="/stripe/success" element={<ProtectedRoute><StripeSuccess /></ProtectedRoute>} />
               <Route path="/stripe/cancel" element={<ProtectedRoute><StripeCancel /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
