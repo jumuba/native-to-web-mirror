@@ -46,14 +46,18 @@ export default function Index() {
 
   const handleImportPhotos = async (folderId: string, files: File[]) => {
     const newPhotos = await Promise.all(
-      files.map(async (file, i) => ({
-        id: `imported-${Date.now()}-${i}`,
-        url: await compressImage(file),
-        title: file.name,
-        date: new Date().toISOString().slice(0, 10),
-        place: "Imported",
-        event: "Import",
-      }))
+      files.map(async (file, i) => {
+        const publicUrl = await uploadPhotoFile(file, folderId);
+        const url = publicUrl ?? (await compressImage(file));
+        return {
+          id: `imported-${Date.now()}-${i}`,
+          url,
+          title: file.name,
+          date: new Date().toISOString().slice(0, 10),
+          place: "Imported",
+          event: "Import",
+        };
+      })
     );
     addPhotosToFolder(folderId, newPhotos);
   };
