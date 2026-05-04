@@ -47,6 +47,13 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { try { localStorage.setItem("folders", JSON.stringify(folders)); } catch (e) { console.warn("localStorage full, folders not saved"); } }, [folders]);
   useEffect(() => { try { localStorage.setItem("albums", JSON.stringify(normalizeAlbums(albums))); } catch (e) { console.warn("localStorage full, albums not saved"); } }, [albums]);
 
+  // Try to hydrate albums from Supabase on mount (non-blocking, falls back to local)
+  useEffect(() => {
+    fetchAlbums().then((remote) => {
+      if (remote && remote.length) setAlbums(normalizeAlbums(remote));
+    }).catch(() => {});
+  }, []);
+
   const createFolder = useCallback((data: { name: string; color: string; font: string; hasPassword: boolean; isPrivate: boolean }) => {
     const newFolder: Folder = {
       id: `folder-${Date.now()}`,
