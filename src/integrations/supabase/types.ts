@@ -14,7 +14,230 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      albums: {
+        Row: {
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          id: string
+          is_collaborative: boolean | null
+          is_private: boolean | null
+          music: string | null
+          notes: Json | null
+          photo_count: number | null
+          theme: string | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          is_collaborative?: boolean | null
+          is_private?: boolean | null
+          music?: string | null
+          notes?: Json | null
+          photo_count?: number | null
+          theme?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          id?: string
+          is_collaborative?: boolean | null
+          is_private?: boolean | null
+          music?: string | null
+          notes?: Json | null
+          photo_count?: number | null
+          theme?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      photos: {
+        Row: {
+          album_id: string | null
+          created_at: string
+          event: string | null
+          id: string
+          place: string | null
+          taken_at: string | null
+          title: string | null
+          url: string
+          user_id: string | null
+        }
+        Insert: {
+          album_id?: string | null
+          created_at?: string
+          event?: string | null
+          id?: string
+          place?: string | null
+          taken_at?: string | null
+          title?: string | null
+          url: string
+          user_id?: string | null
+        }
+        Update: {
+          album_id?: string | null
+          created_at?: string
+          event?: string | null
+          id?: string
+          place?: string | null
+          taken_at?: string | null
+          title?: string | null
+          url?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          created_at: string
+          id: string
+          linked_to: string | null
+          linked_type: string | null
+          message: string | null
+          remind_at: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          linked_to?: string | null
+          linked_type?: string | null
+          message?: string | null
+          remind_at?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          linked_to?: string | null
+          linked_type?: string | null
+          message?: string | null
+          remind_at?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      shares: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          resource_id: string
+          resource_type: string
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          resource_id: string
+          resource_type: string
+          token?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          resource_id?: string
+          resource_type?: string
+          token?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          auth_user_id: string | null
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          plan: string | null
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          plan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
